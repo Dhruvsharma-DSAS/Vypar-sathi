@@ -1,0 +1,4 @@
+export async function loadJson(path){const res=await fetch(path);if(!res.ok)throw new Error('Could not load '+path);return res.json()}
+export async function askAI(task,payload){try{const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task,payload}),signal:AbortSignal.timeout(12000)});if(!res.ok)return null;return await res.json()}catch{return null}}
+export async function backend(path,options={}){const res=await fetch('/api/v1'+path,{...options,headers:{'Content-Type':'application/json',...options.headers},signal:AbortSignal.timeout(15000)});if(!res.ok)throw Error('Backend request failed ('+res.status+').');return res.json()}
+export async function getWeather(city){try{const result=await backend('/weather?city='+encodeURIComponent(city));return {...result.data,stale:result.stale,cached_at:Date.parse(result.retrieved_at_utc)}}catch{return null}}

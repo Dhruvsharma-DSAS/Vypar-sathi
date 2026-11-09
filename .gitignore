@@ -1,0 +1,16 @@
+.DS_Store
+node_modules/
+dist/
+.venv/
+__pycache__/
+.pytest_cache/
+.env
+.env.*
+!.env.example
+*.pyc
+*.log
+*.sqlite3
+*.sqlite3-*
+*.db
+.openai/
+**/data/real/*_raw.json
