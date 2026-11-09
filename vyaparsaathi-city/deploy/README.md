@@ -1,3 +1,11 @@
+# Published app
+
+Frontend: https://vypar-sathi.vercel.app/
+
+Backend: https://vypar-sathi-api.onrender.com/ (API documentation at /docs).
+
+Both services are deployed from Dhruvsharma-DSAS/Vypar-sathi, branch main. The frontend has VITE_BACKEND_URL configured; Render permits its exact production origin. OpenStreetMap remains the default; Google Maps is optional and its browser key is stored in Vercel configuration, not Git.
+
 # Vercel frontend + Render backend
 
 The repository root is the contents of Dhruv's D- vyparsathi/Code folder. Root-level vercel.json, render.yaml and api/chat.js are copied from this directory when preparing the repository. Deploy the repository root to avoid needing Vercel access to files outside an app root.

@@ -16,6 +16,6 @@ services:
       - key: VYAPAR_OBSERVATIONS_ENABLED
         value: 'false'
       - key: CORS_ORIGINS
-        value: http://localhost:5173,http://127.0.0.1:5173
+        value: https://vypar-sathi.vercel.app,http://localhost:5173,http://127.0.0.1:5173
       - key: VYAPAR_DB_PATH
         value: /tmp/vyaparsaathi.sqlite3

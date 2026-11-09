@@ -1,5 +1,7 @@
 # VyaparSaathi City
 
+Live app: https://vypar-sathi.vercel.app/ · Backend documentation: https://vypar-sathi-api.onrender.com/docs
+
 A business-planning application for micro-entrepreneurs in Bengaluru and Pune. This version combines Dhruv's React interface with adapted planning functions from Rupam's Python backend, a unified FastAPI service, real CSV snapshots, and an evaluated weather ML prototype.
 
 External service integrations are **disabled by default**. No credentials are supplied, copied from another project, or committed. Ground Truth Kit has been removed from the application at Dhruv's request.
@@ -103,6 +105,6 @@ The downloadable mobile version is a PWA. Native Android/iOS store packages are 
 
 ## Deployment limits
 
-This is a local hackathon implementation, not a public production service. Deploy the Python API with persistent private storage and route `/api/v1` to it. Vite's development proxy does not become a production reverse proxy. A static or Vercel-only frontend deployment will not run this Python backend; `/api/chat` is a separate Vercel function. Add real account authentication, rate limits, retention, backups and HTTPS before exposing private writes publicly. Live hosting requires authenticated access to your Vercel and Render accounts.
+This is a local hackathon implementation, not a public production service. Deploy the Python API with persistent private storage and route `/api/v1` to it. Vite's development proxy does not become a production reverse proxy. A static or Vercel-only frontend deployment will not run this Python backend; `/api/chat` is a separate Vercel function. Add real account authentication, rate limits, retention, backups and HTTPS before exposing private writes publicly. The app is published on Vercel with its Python API on Render. Hosting management requires authenticated access to those accounts.
 
 The optional geospatial scripts use the separate root `requirements.txt`. They are not required to run the application/backend or train the weather model.

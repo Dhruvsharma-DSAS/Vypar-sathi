@@ -1,5 +1,7 @@
 # VyaparSaathi
 
+**Live app:** https://vypar-sathi.vercel.app/ · **Backend:** https://vypar-sathi-api.onrender.com/docs
+
 A friendly business-planning companion for Bengaluru and Pune, with a light blue financial workspace, expressive Saathi guidebook mascot, interactive maps and an installable mobile web app.
 
 [Application setup](vyaparsaathi-city/README.md) · [Vercel + Render deployment](vyaparsaathi-city/deploy/README.md)
@@ -22,6 +24,6 @@ Open the HTTPS website in a compatible browser and choose Install app. iPhone/iP
 
 ## Hosting
 
-Vercel hosts the frontend using root vercel.json; Render hosts the Python API using root render.yaml. Set VITE_BACKEND_URL on Vercel to the Render origin, and CORS_ORIGINS on Render to the Vercel origin. See the deployment guide. Account sign-in is required before live publishing.
+Vercel hosts the frontend using root vercel.json; Render hosts the Python API using root render.yaml. Set VITE_BACKEND_URL on Vercel to the Render origin, and CORS_ORIGINS on Render to the Vercel origin. See the deployment guide. Both services are published; account sign-in is required to manage deployments.
 
 Only the contents of Dhruv's D- vyparsathi/Code folder are tracked. Credentials, build caches, private runtime databases and dependency folders are excluded.
