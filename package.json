@@ -1,0 +1,11 @@
+{
+  "name": "vypar-sathi-deployment",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  }
+}
