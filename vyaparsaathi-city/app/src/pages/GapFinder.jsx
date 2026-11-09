@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import WardMap from "../components/WardMap.jsx";
+import CityAtlas from "../components/CityAtlas.jsx";
 import Badge from "../components/Badge.jsx";
 import { PILOT_WARDS } from "../App.jsx";
 
@@ -59,7 +60,8 @@ export default function GapFinder(props) {
 
   return (
     <div className="screen">
-      <div className="topbar"><b>Gap Finder</b><Badge level={ward.confidence} /></div>
+      <div className="page-heading"><div><span className="eyebrow">READ THE CITY, BEFORE YOU START</span><h1>City explorer</h1><p>Explore real mapped places, then compare sample ward opportunities.</p></div><Badge level={ward.confidence} /></div><CityAtlas city={p.city} shapes={props.cityData.shapes} expanded/>
+      <div className="section-heading ward-section-title"><div><span className="eyebrow">WARD OPPORTUNITY LAB</span><h2>Compare the neighbourhoods</h2></div><span className="badge sample">Sample population & counts</span></div>
       <p className="page-intro">A gap is a clue, not a guarantee. Compare listed businesses per resident, then check the street yourself.</p>
       <label className="field">Neighbourhood<select aria-label="Select ward" value={selected} onChange={e=>setSelected(e.target.value)}>{stats.wards.map(w=><option key={w.ward_id} value={w.ward_id}>{w.name}</option>)}</select></label>
       <select aria-label="Business category" className="select" value={category} onChange={(e) => setCategory(e.target.value)}>

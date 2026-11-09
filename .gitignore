@@ -14,3 +14,8 @@ __pycache__/
 *.db
 .openai/
 **/data/real/*_raw.json
+
+.vercel/
+**/app/public/downloads/
+**/app/public/data/real/manifest.json
+**/app/public/data/real/weather_report.json

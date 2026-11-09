@@ -16,3 +16,8 @@ __pycache__/
 data/raw/*.tif
 data/raw/*_osm.json
 data/real/*_raw.json
+
+.vercel/
+app/public/downloads/
+app/public/data/real/manifest.json
+app/public/data/real/weather_report.json

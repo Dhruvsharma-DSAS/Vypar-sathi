@@ -58,7 +58,7 @@ export function pathOf(geometry, project) {
 }
 
 export function blueScale(value) {
-  const steps = ["#e9eedf", "#d6e2c3", "#bdcea1", "#a4bc82", "#87a261", "#6c8b4e", "#496b39"];
+  const steps = ["#2b302c", "#3d4136", "#51523f", "#6a654a", "#827653", "#9c895d", "#bca171"];
   let i = Math.floor(value * (steps.length - 1) + 0.0001);
   if (i < 0) i = 0;
   if (i > steps.length - 1) i = steps.length - 1;

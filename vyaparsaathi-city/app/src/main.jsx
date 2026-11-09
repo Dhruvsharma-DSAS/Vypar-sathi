@@ -5,6 +5,8 @@ import App from "./App.jsx";
 import "@fontsource-variable/geist";
 import "./styles.css";
 import "./design.css";
+import "./mission.css";
+import "./finance.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter>

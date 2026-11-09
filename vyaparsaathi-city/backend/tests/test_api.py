@@ -9,6 +9,7 @@ from backend import main
 @pytest.fixture
 def client(tmp_path, monkeypatch):
     monkeypatch.setattr(main, 'DB', tmp_path/'test.sqlite3')
+    monkeypatch.setenv('VYAPAR_OBSERVATIONS_ENABLED','true')
     return TestClient(main.app)
 
 def auth(client):

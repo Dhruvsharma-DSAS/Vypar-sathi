@@ -6,3 +6,8 @@ dist/
 .DS_Store
 *.log
 .openai/local/
+
+.vercel/
+public/downloads/
+public/data/real/manifest.json
+public/data/real/weather_report.json

@@ -113,10 +113,12 @@ def owner(authorization: Annotated[str | None, Header()] = None):
 def health():
     with db() as conn:
         conn.execute('SELECT 1')
-    return {'status': 'ok', 'version': '2.0.0', 'storage': 'sqlite', 'datasets_ready': (DATA / 'manifest.json').exists()}
+    return {'status': 'ok', 'version': '2.1.0', 'storage': 'sqlite', 'datasets_ready': (DATA / 'manifest.json').exists()}
 
 @app.post('/api/v1/sessions', status_code=201)
 def session():
+    if os.environ.get('VYAPAR_OBSERVATIONS_ENABLED') != 'true':
+        raise HTTPException(403, 'Private observation collection is disabled')
     token = secrets.token_urlsafe(32)
     with db() as conn:
         conn.execute('INSERT INTO devices VALUES (?,?)', (hashlib.sha256(token.encode()).hexdigest(), datetime.now(timezone.utc).isoformat()))

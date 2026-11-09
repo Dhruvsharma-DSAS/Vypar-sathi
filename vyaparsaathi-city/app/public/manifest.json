@@ -1,10 +1,10 @@
 {
-  "name": "VyaparSaathi City",
+  "name": "VyaparSaathi \u2014 Your business copilot",
   "short_name": "VyaparSaathi",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f8f9f4",
-  "theme_color": "#2c624c",
+  "background_color": "#f6f9ff",
+  "theme_color": "#f6f9ff",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -20,6 +20,29 @@
     }
   ],
   "id": "/",
-  "description": "Your small business, one step forward.",
-  "scope": "/"
+  "description": "Local knowledge. Your next move. Plan your business in Bengaluru and Pune.",
+  "scope": "/",
+  "orientation": "any",
+  "categories": [
+    "business",
+    "finance",
+    "productivity"
+  ],
+  "shortcuts": [
+    {
+      "name": "Saathi advisor",
+      "url": "/advisor",
+      "description": "Build your business plan"
+    },
+    {
+      "name": "City explorer",
+      "url": "/gap",
+      "description": "Explore mapped businesses"
+    },
+    {
+      "name": "Data observatory",
+      "url": "/data",
+      "description": "Browse records and CSVs"
+    }
+  ]
 }

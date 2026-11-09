@@ -4,6 +4,8 @@ A business-planning application for micro-entrepreneurs in Bengaluru and Pune. T
 
 External service integrations are **disabled by default**. No credentials are supplied, copied from another project, or committed. Ground Truth Kit has been removed from the application at Dhruv's request.
 
+The interface now uses a light blue financial design, an original growth-mark logo, an animated Saathi companion, responsive mobile navigation, install controls and source-backed interactive maps. Map pan/zoom/filtering work without external tile services; reduced-motion and pause controls are supported.
+
 ## Run locally
 
 Use Python 3.12+ and Node 22.12+ (or Node 24). From this directory:
@@ -93,8 +95,14 @@ npm run build
 
 Tests cover ownership isolation, duplicate retries, input validation, operating-day finance, invalid pilot inputs, source CSV checksums/unique IDs, filtering, provider failures, inference, and external APIs being disabled by default. Frontend tests cover parsing, scoring, finance, city/ward/business plan isolation and AI fallback.
 
+## Vercel + Render deployment
+
+See `deploy/README.md` for the complete setup. The repository root includes Vercel frontend configuration and a Render backend blueprint. CSVs are copied into the frontend output during the build, remain downloadable without Render, and are excluded from offline precaching. `VITE_BACKEND_URL` connects the frontend to your deployed Render origin.
+
+The downloadable mobile version is a PWA. Native Android/iOS store packages are not produced.
+
 ## Deployment limits
 
-This is a local hackathon implementation, not a public production service. Deploy the Python API with persistent private storage and route `/api/v1` to it. Vite's development proxy does not become a production reverse proxy. A static or Vercel-only frontend deployment will not run this Python backend; `/api/chat` is a separate Vercel function. Add real account authentication, rate limits, retention, backups and HTTPS before exposing private writes publicly. No hosting deployment was requested or performed.
+This is a local hackathon implementation, not a public production service. Deploy the Python API with persistent private storage and route `/api/v1` to it. Vite's development proxy does not become a production reverse proxy. A static or Vercel-only frontend deployment will not run this Python backend; `/api/chat` is a separate Vercel function. Add real account authentication, rate limits, retention, backups and HTTPS before exposing private writes publicly. Live hosting requires authenticated access to your Vercel and Render accounts.
 
 The optional geospatial scripts use the separate root `requirements.txt`. They are not required to run the application/backend or train the weather model.

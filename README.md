@@ -1,14 +1,27 @@
-# Vypar-sathi
+# VyaparSaathi
 
-VyaparSaathi City: Dhruv's business-planning interface with integrated Python planning services, real business/weather CSVs, and a weather ML prototype.
+A friendly business-planning companion for Bengaluru and Pune, with a light blue financial workspace, expressive Saathi guidebook mascot, interactive maps and an installable mobile web app.
 
-The application source is in [vyaparsaathi-city](vyaparsaathi-city/README.md). See its README for setup, API configuration, testing, data provenance and limits.
+[Application setup](vyaparsaathi-city/README.md) · [Vercel + Render deployment](vyaparsaathi-city/deploy/README.md)
 
-- [Business places CSV: 32,307 records](vyaparsaathi-city/data/real/business_pois.csv)
-- [Hourly weather CSV: 17,520 records](vyaparsaathi-city/data/real/weather_hourly.csv)
-- [Source manifest](vyaparsaathi-city/data/real/manifest.json)
-- [Integration notes](vyaparsaathi-city/docs/INTEGRATION_NOTES.md)
+## Maps
 
-External APIs are disabled until Dhruv supplies and enables his selected services. Ground Truth Kit is removed. These CSVs are dated source snapshots, not live vendor sales or earnings data.
+OpenStreetMap is the default. Google Maps is an optional view, configured with your own browser key. The original coordinate analysis map and ward opportunity lab are preserved. Toggle boundaries, business places and density independently. Google adds street, satellite, hybrid, terrain and optional traffic layers.
 
-Only the contents of D- vyparsathi/Code are included in this repository. Dependencies, build caches, private runtime databases and credentials are excluded.
+## Real CSV downloads
+
+- [32,307 mapped place records](vyaparsaathi-city/data/real/business_pois.csv)
+- [17,520 hourly weather records](vyaparsaathi-city/data/real/weather_hourly.csv)
+- [Source manifest and timestamps](vyaparsaathi-city/data/real/manifest.json)
+
+The frontend build also bundles these CSVs for direct downloading without the backend. They are dated snapshots, not live sales or profits. Live weather/AI/mandi integrations remain disabled pending provider configuration. OpenStreetMap tiles are enabled; Google loads only when selected.
+
+## Installable mobile version
+
+Open the HTTPS website in a compatible browser and choose Install app. iPhone/iPad: Safari > Share > Add to Home Screen. This is a PWA, not a signed native APK/App Store package.
+
+## Hosting
+
+Vercel hosts the frontend using root vercel.json; Render hosts the Python API using root render.yaml. Set VITE_BACKEND_URL on Vercel to the Render origin, and CORS_ORIGINS on Render to the Vercel origin. See the deployment guide. Account sign-in is required before live publishing.
+
+Only the contents of Dhruv's D- vyparsathi/Code folder are tracked. Credentials, build caches, private runtime databases and dependency folders are excluded.
