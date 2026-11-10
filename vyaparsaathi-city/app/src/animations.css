@@ -1,0 +1,293 @@
+/* ========================================================
+   ZOMATO-GRADE ANIMATIONS & MICRO-INTERACTIONS SYSTEM
+   ======================================================== */
+
+@keyframes zFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes zFadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes zScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes zSlideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes zBarGrowVertical {
+  from {
+    transform: scaleY(0);
+    opacity: 0.3;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes zBarGrowHorizontal {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--target-width, 100%);
+  }
+}
+
+@keyframes zPulseSoft {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(226, 55, 68, 0.4);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 10px rgba(226, 55, 68, 0);
+  }
+}
+
+@keyframes zFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes zShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes zBadgePop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Page Entrance Transition */
+.screen {
+  animation: zFadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+/* Stagger Animation Classes for Lists & Grids */
+.anim-fade-up {
+  animation: zFadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.anim-scale-in {
+  animation: zScaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.anim-stagger-1 { animation-delay: 0.05s !important; }
+.anim-stagger-2 { animation-delay: 0.10s !important; }
+.anim-stagger-3 { animation-delay: 0.15s !important; }
+.anim-stagger-4 { animation-delay: 0.20s !important; }
+.anim-stagger-5 { animation-delay: 0.25s !important; }
+.anim-stagger-6 { animation-delay: 0.30s !important; }
+.anim-stagger-7 { animation-delay: 0.35s !important; }
+.anim-stagger-8 { animation-delay: 0.40s !important; }
+
+/* Enhanced Micro-Interactions */
+button, .button, .zomato-card, .locality-rank-card, .zomato-category-card, .side-link {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+button:active, .button:active {
+  transform: scale(0.97) !important;
+}
+
+.zomato-category-card:hover {
+  transform: translateY(-4px) scale(1.02) !important;
+}
+
+.zomato-card:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 16px 36px rgba(28, 28, 28, 0.12) !important;
+}
+
+/* Float banner mascot */
+.zomato-promo-banner .saathi-bot {
+  animation: zFloat 4s ease-in-out infinite;
+}
+
+/* Pulse tag */
+.promo-tag {
+  animation: zBadgePop 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Rating badge pop */
+.zomato-rating-badge {
+  animation: zBadgePop 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Interactive Card Polish */
+.stat-card-interactive {
+  background: #FFFFFF;
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-lg);
+  padding: 20px;
+  box-shadow: var(--z-shadow-sm);
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card-interactive:hover {
+  transform: translateY(-3px);
+  border-color: var(--z-red-border);
+  box-shadow: var(--z-shadow);
+}
+
+/* Scheme Cards Polish */
+.scheme-card-zomato {
+  background: #FFFFFF;
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-xl);
+  padding: 24px;
+  box-shadow: var(--z-shadow-sm);
+  margin-bottom: 20px;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.scheme-card-zomato:hover {
+  transform: translateY(-3px);
+  border-color: var(--z-red-border);
+  box-shadow: var(--z-shadow);
+}
+
+.scheme-match-pill {
+  background: var(--z-green-light);
+  color: var(--z-green-dark);
+  border: 1px solid var(--z-green-border);
+  padding: 4px 10px;
+  border-radius: var(--z-radius-full);
+  font-size: 12px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Checklist Items Polish */
+.check-item-zomato {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  background: #FAFAFA;
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-md);
+  margin-bottom: 10px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.check-item-zomato:hover {
+  background: #FFFFFF;
+  border-color: var(--z-red-border);
+  transform: translateX(4px);
+}
+
+.check-item-zomato.done {
+  background: var(--z-green-light);
+  border-color: var(--z-green-border);
+}
+
+.check-box-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid #CBD5E1;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  font-weight: 800;
+  color: #FFFFFF;
+  background: #FFFFFF;
+}
+
+.check-item-zomato.done .check-box-icon {
+  background: var(--z-green);
+  border-color: var(--z-green);
+}
+
+/* Khata Bars in MyPlan */
+.khata-bars {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  height: 160px !important;
+  background: #F8F9FA !important;
+  border: 1px solid var(--z-border) !important;
+  border-radius: var(--z-radius-lg) !important;
+  padding: 24px 16px 14px !important;
+  margin: 20px 0 !important;
+  position: relative !important;
+}
+
+.kb-bar {
+  background: linear-gradient(180deg, var(--z-red) 0%, #FF6B78 100%) !important;
+  border-radius: 6px 6px 0 0 !important;
+  width: 24px !important;
+  transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: 0 4px 10px rgba(226, 55, 68, 0.25) !important;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

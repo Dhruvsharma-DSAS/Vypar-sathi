@@ -1,19 +1,19 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense, Component } from "react";
 import { Routes, Route } from "react-router-dom";
 import { loadJson } from "./lib/api.js";
 import Shell from "./components/Shell.jsx";
-import Settings from "./pages/Settings.jsx";
+const Settings = lazy(()=>import("./pages/Settings.jsx"));
 import { readStore, writeStore } from "./lib/storage.js";
-import Home from "./pages/Home.jsx";
-import Advisor from "./pages/Advisor.jsx";
-import IdeaDetail from "./pages/IdeaDetail.jsx";
-import GapFinder from "./pages/GapFinder.jsx";
-import SpotTime from "./pages/SpotTime.jsx";
-import CostProfit from "./pages/CostProfit.jsx";
-import Schemes from "./pages/Schemes.jsx";
-import MyPlan from "./pages/MyPlan.jsx";
-import DataWorkspace from "./pages/DataWorkspace.jsx";
+const Home = lazy(()=>import("./pages/Home.jsx"));
+const Advisor = lazy(()=>import("./pages/Advisor.jsx"));
+const IdeaDetail = lazy(()=>import("./pages/IdeaDetail.jsx"));
+const GapFinder = lazy(()=>import("./pages/GapFinder.jsx"));
+const SpotTime = lazy(()=>import("./pages/SpotTime.jsx"));
+const CostProfit = lazy(()=>import("./pages/CostProfit.jsx"));
+const Schemes = lazy(()=>import("./pages/Schemes.jsx"));
+const MyPlan = lazy(()=>import("./pages/MyPlan.jsx"));
+const DataWorkspace = lazy(()=>import("./pages/DataWorkspace.jsx"));
 
 export const PILOT_WARDS = {
   bengaluru: ["BLR-186", "BLR-192", "BLR-185", "BLR-178", "BLR-191"],
@@ -32,6 +32,12 @@ const EMPTY_PROFILE = {
   hours: "",
   loan: null,
 };
+
+class ToolBoundary extends Component {
+ constructor(props){super(props);this.state={failed:false}}
+ static getDerivedStateFromError(){return {failed:true}}
+ render(){if(this.state.failed)return <div className="screen market-empty" role="alert"><h1>This tool couldn’t load.</h1><p>Reconnect and retry. Tools you previously visited remain available offline.</p><button className="button primary" onClick={()=>window.location.reload()}>Retry</button> <a className="button secondary" href="/">Back to Discover</a></div>;return this.props.children}
+}
 
 export default function App() {
   const [profile, setProfile] = useState(() => {
@@ -94,7 +100,7 @@ export default function App() {
 
   return (
     <Shell profile={profile} updateProfile={updateProfile}>
-      <Routes key={profile.city}>
+      <ToolBoundary><Suspense fallback={<div className="screen" role="status"><div className="skeleton skeleton-hero"/>Loading your workspace…</div>}><Routes key={profile.city}>
         <Route path="/" element={<Home {...shared} />} />
         <Route path="/advisor" element={<Advisor {...shared} />} />
         <Route path="/idea/:typeId" element={<IdeaDetail {...shared} />} />
@@ -106,7 +112,7 @@ export default function App() {
         <Route path="/data" element={<DataWorkspace {...shared} />} />
         <Route path="/settings" element={<Settings {...shared} />} />
         <Route path="*" element={<div className="screen"><h1>Page not found</h1><a href="/">Back to overview</a></div>} />
-      </Routes>
+      </Routes></Suspense></ToolBoundary>
     </Shell>
   );
 }

@@ -19,6 +19,8 @@ for city in ['bengaluru','pune']:
   lat,lng=float(r['latitude']),float(r['longitude']);cell=(math.floor(lat*100),math.floor(lng*100))
   if cell not in cells:cells[cell]={'lat':cell[0]/100+.005,'lng':cell[1]/100+.005,'count':0,'categories':{}}
   cells[cell]['count']+=1;c=r['category'];cells[cell]['categories'][c]=cells[cell]['categories'].get(c,0)+1
+  if r['name'] and ('landmark' not in cells[cell] or (c in ['school','college','hospital'] and cells[cell]['landmark']['category'] not in ['school','college','hospital'])):
+   cells[cell]['landmark']={'name':r['name'],'category':c,'source_url':r['source_url']}
  payload={'density':list(cells.values()),'city':city,'total':len(group),'preview_count':len(points),'retrieved_at_utc':group[0]['retrieved_at_utc'],'points':points,'categories':Counter(r['category'] for r in group).most_common(8)}
  (OUT/(city+'_map.json')).write_text(json.dumps(payload,separators=(',',':')))
  summary['cities'][city]={'total':len(group),'categories':payload['categories']}

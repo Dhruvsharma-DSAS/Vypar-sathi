@@ -108,3 +108,13 @@ The downloadable mobile version is a PWA. Native Android/iOS store packages are 
 This is a local hackathon implementation, not a public production service. Deploy the Python API with persistent private storage and route `/api/v1` to it. Vite's development proxy does not become a production reverse proxy. A static or Vercel-only frontend deployment will not run this Python backend; `/api/chat` is a separate Vercel function. Add real account authentication, rate limits, retention, backups and HTTPS before exposing private writes publicly. The app is published on Vercel with its Python API on Render. Hosting management requires authenticated access to those accounts.
 
 The optional geospatial scripts use the separate root `requirements.txt`. They are not required to run the application/backend or train the weather model.
+
+### Discovery and locality lab redesign — 10 November 2026
+
+The blue marketplace interface uses a shared horizontal navigation, category browsing, searchable business templates, cash-budget filtering and a three-business comparison. Setup cash includes one month of fixed costs. The new compass companion reacts to conversation state; optional external AI remains disabled until configured by the owner.
+
+The locality lab has three steps: compare mapped supply, stress-test cash and validate on the street. It aggregates the complete downloaded OSM snapshot into 0.01-degree cells, excludes cells with fewer than ten mapped objects, and exposes category share, mapped context anchors, exact coordinates and a named reference object from the same source cell. References are not locality names or verified trading spots. Sorting is explicit; counts are not customer demand, footfall, ratings, rent or profits. The evidence CSV exports all qualifying cells for the selected category, with source, retrieval time and limitations. Spreadsheet formula prefixes in text are neutralised.
+
+Scenarios use 26 operating days, sample sales volume and sample prices. Sales and input costs can be stressed independently. No observed vendor sales are available. The original ward-gap explorer remains under its sample-data disclosure; OpenStreetMap is still the default and Google Maps and the original analysis map remain selectable.
+
+Route tools and maps load on demand. The service worker saves the core discovery screen and planning reference data, then caches other tools as visited; CSV downloads, API calls and third-party map tiles are excluded. Desktop and 360/390-pixel mobile layouts were checked, including empty search, filters, comparison, city switching and map modes. Frontend tests cover conservation of source counts, sparse-cell filtering, stress arithmetic and safe CSV escaping.

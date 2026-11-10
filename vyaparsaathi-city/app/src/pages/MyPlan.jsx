@@ -1,12 +1,396 @@
-import {useEffect,useState} from 'react';
-import {Link} from 'react-router-dom';
-import {unitCost,rupees,startupTotal} from '../lib/money.js';
-import {readStore,writeStore,planKey,downloadJson,localDate} from '../lib/storage.js';
-import Icon from '../components/Icon.jsx';
-export default function MyPlan(props){return <Plan key={planKey(props.profile)} {...props}/>}
-function Plan({profile:p,common,cityData}){const type=common.types.find(t=>t.id===p.businessId)||common.types[0];const ward=cityData.stats.wards.find(w=>w.ward_id===p.wardId);const key=planKey(p);const cost=unitCost(common.recipes[type.recipe],common.mandi[p.city]);const assumptions=readStore(key+'_cost',{price:type.price,units:type.typical_units_per_day,fixed:type.monthly_fixed,days:30});const [khata,setKhata]=useState(()=>readStore(key+'_khata',[]));const [date,setDate]=useState(localDate());const [sales,setSales]=useState('');const [units,setUnits]=useState('');const [error,setError]=useState('');const [steps,setSteps]=useState(()=>readStore(key+'_steps',{}));const papers=readStore(key+'_papers',{});useEffect(()=>{writeStore(key+'_khata',khata)},[khata,key]);useEffect(()=>{writeStore(key+'_steps',steps)},[steps,key]);
-function addDay(e){e.preventDefault();if(khata.length>=7){setError('Your seven-day pilot is complete. Review or remove an entry to correct it.');return}if(!date||units===''||sales===''||Number(units)<0||Number(sales)<0||!Number.isInteger(Number(units))){setError('Enter a date, whole units sold (zero is allowed), and non-negative sales.');return}if(khata.some(x=>x.date===date)){setError('That date is already logged. Remove its entry to correct it.');return}setKhata(old=>[...old,{date,sales:Number(sales),units:Number(units)}].sort((a,b)=>a.date.localeCompare(b.date)));setUnits('');setSales('');setError('');}
-const forecast=assumptions.units;const maxUnits=Math.max(1,forecast,...khata.map(k=>k.units));const total=khata.reduce((a,k)=>a+k.units,0);const revenue=khata.reduce((a,k)=>a+k.sales,0);const avg=khata.length?total/khata.length:0;const ratio=forecast>0?avg/forecast:null;let verdict='Log at least three days to compare real sales with your forecast.';if(khata.length>=3)verdict=ratio===null?'Add a sales forecast above zero in Cost & Profit to compare your pilot.':ratio>=1?'At or above forecast. A positive early sign — keep checking costs and demand.':ratio>=.7?'A little below forecast. Try selling only during peak hours, then review.':'Well below forecast. Try another spot before committing more savings.';
-const roadmap=[['Profile ready',p.money>0&&!!p.skill,'/advisor'],['Business chosen',!!p.businessId,'/advisor'],['Spot & time checked',!!steps.spot,'/spot'],['Costs reviewed',!!steps.cost,'/cost'],['Papers prepared',type.licences.every(id=>papers[id]),'/schemes'],['Seven-day pilot',khata.length===7,'/plan']];
-const exportPlan=()=>downloadJson('my-vyaparsaathi-plan.json',{created_at:new Date().toISOString(),profile:p,business:type.name,ward:ward?.name||null,data_status:'Sample estimates; verify in person',assumptions,unit_cost:cost.total,funding_gap:Math.max(0,startupTotal(type)+assumptions.fixed-p.money),pilot:khata,checklist:steps,papers});
-return <div className="screen"><div className="page-heading"><div><div className="eyebrow">ONE SMALL STEP, EVERY DAY</div><h1>My business plan</h1><p>Make a plan. Try it small. Learn what works.</p></div><div className="button-row no-print"><button className="button secondary" onClick={exportPlan}><Icon name="download" size={16}/>Export plan</button><button className="button secondary" onClick={()=>window.print()}>Print / PDF</button></div></div>{!p.businessId&&<div className="notice">You’re previewing a momo cart plan. <Link className="link" to="/advisor">Tell Saathi about your business →</Link></div>}<div className="two-column"><div><section className="card"><div className="card-title">Your plan at a glance <span className="badge sample">Sample estimates</span></div>{[['Business',type.name],['Neighbourhood',ward?.name||'Choose your neighbourhood'],['Your savings',rupees(p.money)],['Cost per '+type.unit,'₹'+cost.total.toFixed(2)],['Selling price',rupees(assumptions.price)],['Sales forecast',assumptions.units+' '+type.unit+'s / day'],['Estimated funding gap',rupees(Math.max(0,startupTotal(type)+assumptions.fixed-p.money))]].map(([label,value])=><div className="kv" key={label}><span>{label}</span><b>{value}</b></div>)}<p className="source-line">Before you invest, check local demand, vending permission and supplier quotes in person.</p></section><section className="card"><h2>Your path to a small beginning</h2>{roadmap.map(([label,done,path],i)=><div className="next-step" key={label}><span className={'step-number '+(done?'completed':'')}>{done?<Icon name="check" size={14}/>:i+1}</span><Link to={path} style={{flex:1,fontSize:12}}>{label}</Link>{['Spot & time checked','Costs reviewed'].includes(label)?<input type="checkbox" aria-label={label} checked={done} onChange={e=>setSteps(old=>({...old,[i===2?'spot':'cost']:e.target.checked}))}/>:<Link to={path} className="subtle-link">{done?'Review':'Start'} →</Link>}</div>)}</section></div><section className="card"><div className="card-title">Seven-day Pilot Khata <span className="saved-indicator">{khata.length} of 7 days</span></div><p>Before spending big, try a small week. Log what you actually sold, including quiet days.</p><div className="khata-bars" role="img" aria-label={`Pilot: ${khata.length} days logged, ${total} units sold; forecast ${forecast} units per day.`}>{Array.from({length:7},(_,i)=>{const k=khata[i];return <div className="kb" key={i}><span>{k?.units??'—'}</span><div className="kb-bar" style={{height:k?(k.units/maxUnits)*125+'px':'3px',opacity:k?1:.25}}/><span>D{i+1}</span></div>})}<div className="kb-line" style={{bottom:forecast/maxUnits*125+25+'px'}}>forecast {forecast}</div></div><div className="forecast-note">{verdict}</div><div className="kv"><span>Pilot sales total</span><b>{rupees(revenue)}</b></div><div className="kv"><span>Average units per day</span><b>{avg.toFixed(1)}</b></div>{khata.length>0&&<table className="entry-table"><thead><tr><th>Date</th><th>Units</th><th>Sales</th><th className="no-print">Correct</th></tr></thead><tbody>{khata.map(k=><tr key={k.date}><td>{k.date}</td><td>{k.units}</td><td>{rupees(k.sales)}</td><td className="no-print"><button onClick={()=>setKhata(khata.filter(x=>x.date!==k.date))} aria-label={'Remove '+k.date}>Remove</button></td></tr>)}</tbody></table>}{khata.length<7&&<form onSubmit={addDay} className="no-print"><label className="field">Pilot date<input type="date" value={date} max={localDate()} required onChange={e=>setDate(e.target.value)}/></label><div className="emi"><label>Total sales (₹)<input type="number" min="0" step="0.01" required value={sales} onChange={e=>setSales(e.target.value)}/></label><label>{type.unit}s sold<input type="number" min="0" step="1" required value={units} onChange={e=>setUnits(e.target.value)}/></label></div><button className="button primary" type="submit">Save pilot day <Icon name="check" size={16}/></button></form>}{error&&<p className="input-error" role="alert">{error}</p>}<p className="source-line">Saved on this device, separately for each city, ward and business. Export your plan to keep a copy.</p></section></div></div>}
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { unitCost, rupees, startupTotal } from "../lib/money.js";
+import { readStore, writeStore, planKey, downloadJson, localDate } from "../lib/storage.js";
+import Icon from "../components/Icon.jsx";
+
+export default function MyPlan(props) {
+  return <Plan key={planKey(props.profile)} {...props} />;
+}
+
+function Plan({ profile: p, common, cityData }) {
+  const type = common.types.find((t) => t.id === p.businessId) || common.types[0];
+  const ward = cityData.stats.wards.find((w) => w.ward_id === p.wardId);
+  const key = planKey(p);
+  const cost = unitCost(common.recipes[type.recipe], common.mandi[p.city]);
+  const assumptions = readStore(key + "_cost", {
+    price: type.price,
+    units: type.typical_units_per_day,
+    fixed: type.monthly_fixed,
+    days: 30,
+  });
+
+  const [khata, setKhata] = useState(() => readStore(key + "_khata", []));
+  const [date, setDate] = useState(localDate());
+  const [sales, setSales] = useState("");
+  const [units, setUnits] = useState("");
+  const [error, setError] = useState("");
+  const [steps, setSteps] = useState(() => readStore(key + "_steps", {}));
+  const papers = readStore(key + "_papers", {});
+
+  useEffect(() => {
+    writeStore(key + "_khata", khata);
+  }, [khata, key]);
+
+  useEffect(() => {
+    writeStore(key + "_steps", steps);
+  }, [steps, key]);
+
+  function addDay(e) {
+    e.preventDefault();
+    if (khata.length >= 7) {
+      setError("Your 7-day pilot trial is complete! Review or remove an entry to adjust.");
+      return;
+    }
+    if (
+      !date ||
+      units === "" ||
+      sales === "" ||
+      Number(units) < 0 ||
+      Number(sales) < 0 ||
+      !Number.isInteger(Number(units))
+    ) {
+      setError("Enter valid date, integer units sold, and non-negative gross sales.");
+      return;
+    }
+    if (khata.some((x) => x.date === date)) {
+      setError("That date is already recorded. Remove existing entry first to update.");
+      return;
+    }
+    setKhata((old) =>
+      [...old, { date, sales: Number(sales), units: Number(units) }].sort((a, b) =>
+        a.date.localeCompare(b.date)
+      )
+    );
+    setUnits("");
+    setSales("");
+    setError("");
+  }
+
+  const forecast = assumptions.units;
+  const maxUnits = Math.max(1, forecast, ...khata.map((k) => k.units));
+  const total = khata.reduce((a, k) => a + k.units, 0);
+  const revenue = khata.reduce((a, k) => a + k.sales, 0);
+  const avg = khata.length ? total / khata.length : 0;
+  const ratio = forecast > 0 ? avg / forecast : null;
+
+  let verdict = "Log at least 3 pilot operating days to benchmark actual sales with your forecast.";
+  if (khata.length >= 3) {
+    verdict =
+      ratio === null
+        ? "Add a positive daily forecast in Cost & Profit to benchmark your pilot."
+        : ratio >= 1
+        ? "At or above forecast volume! Strong early commercial signal — maintain quality and track peak hours."
+        : ratio >= 0.7
+        ? "Slightly below forecast. Optimize rush hour presence or adjust stall position before scaling."
+        : "Significantly below forecast. Test a secondary corridor before committing further savings.";
+  }
+
+  const roadmap = [
+    ["Profile Ready", p.money > 0 && !!p.skill, "/advisor"],
+    ["Business Blueprint Selected", !!p.businessId, "/advisor"],
+    ["Spot & Rush Hours Checked", !!steps.spot, "/spot"],
+    ["Unit Economics Verified", !!steps.cost, "/cost"],
+    ["Permits & Licences Prepped", type.licences.every((id) => papers[id]), "/schemes"],
+    ["7-Day Pilot Completed", khata.length === 7, "/plan"],
+  ];
+
+  const exportPlan = () =>
+    downloadJson("vyaparsaathi-business-plan.json", {
+      created_at: new Date().toISOString(),
+      profile: p,
+      business: type.name,
+      ward: ward?.name || null,
+      data_status: "Business pilot record with sample planning assumptions",
+      assumptions,
+      unit_cost: cost.total,
+      funding_gap: Math.max(0, startupTotal(type) + assumptions.fixed - p.money),
+      pilot: khata,
+      checklist: steps,
+      papers,
+    });
+
+  return (
+    <div className="screen">
+      {/* Page Heading & Action Buttons */}
+      <div className="page-heading anim-fade-up" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
+        <div>
+          <span className="eyebrow" style={{ color: "var(--z-red)", fontWeight: 700 }}>
+            LAUNCH TRACKER & FIELD VALIDATION
+          </span>
+          <h1 style={{ fontSize: "28px", fontWeight: 800, margin: "4px 0" }}>
+            My Business Plan & Pilot Log
+          </h1>
+          <p style={{ fontSize: "13px", color: "var(--z-gray-muted)" }}>
+            Run a seven-day pilot, record actual costs and sales, and keep your next steps in one place.
+          </p>
+        </div>
+
+        <div className="button-row no-print" style={{ display: "flex", gap: "10px" }}>
+          <button className="button secondary" onClick={exportPlan}>
+            <Icon name="download" size={16} /> Export JSON
+          </button>
+          <button className="button primary" onClick={() => window.print()}>
+            Print / Save PDF
+          </button>
+        </div>
+      </div>
+
+      {!p.businessId && (
+        <div
+          className="anim-fade-up"
+          style={{
+            background: "var(--z-amber-light)",
+            border: "1px solid #FDE68A",
+            borderRadius: "var(--z-radius-md)",
+            padding: "12px 18px",
+            marginBottom: "20px",
+            fontSize: "13px",
+            color: "#B45309",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <span>Previewing a default momo cart blueprint. Personalize your concept with Saathi.</span>
+          <Link to="/advisor" style={{ color: "var(--z-red)", fontWeight: 700, textDecoration: "none" }}>
+            Open Advisor →
+          </Link>
+        </div>
+      )}
+
+      <div className="two-column">
+        {/* Left Column: Plan at a Glance & Path to Beginning */}
+        <div>
+          {/* Summary Card */}
+          <section className="card anim-fade-up anim-stagger-1" style={{ marginBottom: "24px" }}>
+            <div className="card-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span> Active Business Summary</span>
+              <span className="badge">{p.city === "pune" ? "Pune" : "Bengaluru"}</span>
+            </div>
+
+            {[
+              ["Target Concept", type.name],
+              ["Location Zone", ward?.name || "Choose your neighbourhood"],
+              ["Committed Savings", rupees(p.money)],
+              ["Cost per " + type.unit, "₹" + cost.total.toFixed(2)],
+              ["Selling Price", rupees(assumptions.price)],
+              ["Sales Target", assumptions.units + " " + type.unit + "s / day"],
+              ["Capital Deficit", rupees(Math.max(0, startupTotal(type) + assumptions.fixed - p.money))],
+            ].map(([label, value]) => (
+              <div className="kv" key={label}>
+                <span>{label}</span>
+                <b>{value}</b>
+              </div>
+            ))}
+          </section>
+
+          {/* Path to Beginning Roadmap */}
+          <section className="card anim-fade-up anim-stagger-2">
+            <h2 style={{ fontSize: "18px", fontWeight: 700, margin: "0 0 16px", color: "var(--z-dark)" }}>
+               Launch Milestones Tracker
+            </h2>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {roadmap.map(([label, done, path], i) => (
+                <div
+                  key={label}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    padding: "12px 14px",
+                    background: done ? "var(--z-green-light)" : "#FAFAFA",
+                    border: `1px solid ${done ? "var(--z-green-border)" : "var(--z-border)"}`,
+                    borderRadius: "var(--z-radius-md)",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "50%",
+                      background: done ? "var(--z-green)" : "#E2E8F0",
+                      color: done ? "#FFFFFF" : "var(--z-dark)",
+                      display: "grid",
+                      placeItems: "center",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {done ? "" : i + 1}
+                  </div>
+
+                  <Link to={path} style={{ flex: 1, fontSize: "13px", fontWeight: 600, color: "var(--z-dark)", textDecoration: "none" }}>
+                    {label}
+                  </Link>
+
+                  {["Spot & Rush Hours Checked", "Unit Economics Verified"].includes(label) ? (
+                    <input
+                      type="checkbox"
+                      aria-label={label}
+                      checked={done}
+                      onChange={(e) =>
+                        setSteps((old) => ({
+                          ...old,
+                          [i === 2 ? "spot" : "cost"]: e.target.checked,
+                        }))
+                      }
+                      style={{ cursor: "pointer", width: "18px", height: "18px" }}
+                    />
+                  ) : (
+                    <Link to={path} style={{ fontSize: "12px", color: "var(--z-red)", fontWeight: 700, textDecoration: "none" }}>
+                      {done ? "Review" : "Start"} →
+                    </Link>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        {/* Right Column: 7-Day Pilot Khata */}
+        <div>
+          <section className="card anim-fade-up anim-stagger-2">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+              <div>
+                <h2 style={{ fontSize: "18px", fontWeight: 700, margin: 0, color: "var(--z-dark)" }}>
+                   7-Day Pilot Khata
+                </h2>
+                <span style={{ fontSize: "12px", color: "var(--z-gray-muted)" }}>
+                  Validate before heavy investment
+                </span>
+              </div>
+              <span className="badge green" style={{ fontSize: "12px" }}>
+                {khata.length} of 7 Days Logged
+              </span>
+            </div>
+
+            {/* Visual Bar Chart for Pilot Khata */}
+            <div className="khata-bars" role="img" aria-label={`Pilot trial: ${khata.length} days logged`}>
+              {Array.from({ length: 7 }, (_, i) => {
+                const k = khata[i];
+                return (
+                  <div
+                    key={i}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      height: "100%",
+                      justifyContent: "flex-end",
+                      gap: "6px",
+                      flex: 1,
+                    }}
+                  >
+                    <span style={{ fontSize: "10px", fontWeight: 700, color: k ? "var(--z-dark)" : "var(--z-gray-muted)" }}>
+                      {k?.units ?? "—"}
+                    </span>
+                    <div
+                      className="kb-bar"
+                      style={{
+                        height: k ? `${(k.units / maxUnits) * 90}px` : "4px",
+                        opacity: k ? 1 : 0.25,
+                      }}
+                    />
+                    <span style={{ fontSize: "10px", color: "var(--z-gray-muted)", fontWeight: 600 }}>
+                      D{i + 1}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Verdict Note */}
+            <div
+              style={{
+                background: "#F8F9FA",
+                border: "1px solid var(--z-border)",
+                borderRadius: "var(--z-radius-md)",
+                padding: "14px 16px",
+                margin: "16px 0",
+                fontSize: "13px",
+                color: "var(--z-dark)",
+                lineHeight: 1.5,
+              }}
+            >
+              <b>Pilot Feedback:</b> {verdict}
+            </div>
+
+            {/* Metrics */}
+            <div className="kv">
+              <span>Total Recorded Revenue</span>
+              <b style={{ color: "var(--z-green-dark)", fontSize: "15px" }}>{rupees(revenue)}</b>
+            </div>
+            <div className="kv">
+              <span>Average Volume Sold</span>
+              <b>{avg.toFixed(1)} {type.unit}s / day</b>
+            </div>
+
+            {/* Log Table */}
+            {khata.length > 0 && (
+              <div style={{ overflowX: "auto", margin: "16px 0" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+                  <thead>
+                    <tr style={{ background: "#F4F5F7", textAlign: "left", color: "var(--z-gray-body)" }}>
+                      <th style={{ padding: "8px 10px", borderRadius: "6px 0 0 6px" }}>Date</th>
+                      <th style={{ padding: "8px 10px" }}>Units</th>
+                      <th style={{ padding: "8px 10px" }}>Sales</th>
+                      <th style={{ padding: "8px 10px", textAlign: "right", borderRadius: "0 6px 6px 0" }} className="no-print">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {khata.map((k) => (
+                      <tr key={k.date} style={{ borderBottom: "1px solid var(--z-border-subtle)" }}>
+                        <td style={{ padding: "8px 10px" }}>{k.date}</td>
+                        <td style={{ padding: "8px 10px" }}>{k.units}</td>
+                        <td style={{ padding: "8px 10px" }}>{rupees(k.sales)}</td>
+                        <td style={{ padding: "8px 10px", textAlign: "right" }} className="no-print">
+                          <button
+                            onClick={() => setKhata(khata.filter((x) => x.date !== k.date))}
+                            style={{ background: "transparent", border: "none", color: "var(--z-red)", cursor: "pointer", fontSize: "11px", fontWeight: 700 }}
+                          >
+                            Remove
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Add New Day Form */}
+            {khata.length < 7 && (
+              <form onSubmit={addDay} className="no-print" style={{ background: "#FAFAFA", border: "1px solid var(--z-border)", borderRadius: "var(--z-radius-md)", padding: "16px", marginTop: "16px" }}>
+                <label className="field" style={{ marginBottom: "12px" }}>
+                  Operating Date
+                  <input type="date" value={date} max={localDate()} required onChange={(e) => setDate(e.target.value)} />
+                </label>
+
+                <div className="emi">
+                  <label>
+                    Total Sales (₹)
+                    <input type="number" min="0" step="0.01" required value={sales} placeholder="e.g. 2400" onChange={(e) => setSales(e.target.value)} />
+                  </label>
+                  <label>
+                    {type.unit}s Sold
+                    <input type="number" min="0" step="1" required value={units} placeholder="e.g. 40" onChange={(e) => setUnits(e.target.value)} />
+                  </label>
+                </div>
+
+                <button className="button primary" type="submit" style={{ width: "100%", padding: "12px", marginTop: "14px" }}>
+                  Save Pilot Day ({khata.length + 1}/7)
+                </button>
+              </form>
+            )}
+
+            {error && <p style={{ color: "var(--z-red)", fontSize: "12px", marginTop: "8px", fontWeight: 600 }}>{error}</p>}
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,1747 @@
+/* Zomato-Grade Design System for VyaparSaathi */
+:root {
+  color-scheme: light;
+  --z-red: #E23744;
+  --z-red-hover: #D32F2F;
+  --z-red-dark: #C62828;
+  --z-red-light: #FFF0F2;
+  --z-red-soft: #FFE5E7;
+  --z-red-border: #FFCDD2;
+  --z-green: #24963F;
+  --z-green-dark: #1E7E34;
+  --z-green-light: #F0FDF4;
+  --z-green-border: #BBF7D0;
+  --z-amber: #F59E0B;
+  --z-amber-light: #FEF3C7;
+  --z-dark: #1C1C1C;
+  --z-gray-dark: #363636;
+  --z-gray-body: #4F4F4F;
+  --z-gray-muted: #7E7E7E;
+  --z-gray-subtle: #9C9C9C;
+  --z-border: #E8E8E8;
+  --z-border-subtle: #F0F0F0;
+  --z-card: #FFFFFF;
+  --z-bg: #F8F9FA;
+  --z-surface: #FFFFFF;
+  --z-radius-sm: 8px;
+  --z-radius-md: 14px;
+  --z-radius-lg: 18px;
+  --z-radius-xl: 24px;
+  --z-radius-full: 9999px;
+  --z-shadow-sm: 0 2px 8px rgba(28, 28, 28, 0.04);
+  --z-shadow: 0 4px 18px rgba(28, 28, 28, 0.07);
+  --z-shadow-lg: 0 12px 32px rgba(28, 28, 28, 0.11);
+  --z-shadow-red: 0 6px 20px rgba(226, 55, 68, 0.25);
+
+  /* Overwrite legacy CSS variables */
+  --canvas: var(--z-bg);
+  --surface: var(--z-card);
+  --surface-raised: #FFFFFF;
+  --ink: var(--z-dark);
+  --text-secondary: var(--z-gray-body);
+  --border: var(--z-border);
+  --accent: var(--z-red);
+  --forest: var(--z-red);
+  --forest-deep: #16181C;
+  --green: var(--z-green);
+  --card: var(--z-card);
+  --bg: var(--z-bg);
+  --line: var(--z-border);
+  --sidebar: 260px;
+}
+
+/* Global Reset & Base */
+body {
+  background: var(--z-bg) !important;
+  color: var(--z-dark) !important;
+  font-family: 'Geist Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+}
+
+body::before {
+  display: none !important;
+}
+
+::selection {
+  background: var(--z-red-soft);
+  color: var(--z-red-dark);
+}
+
+/* App Shell Layout */
+.app-shell {
+  min-height: 100vh;
+  background: var(--z-bg);
+  display: flex;
+}
+
+/* Sidebar (Desktop Zomato Manager Style) */
+.sidebar {
+  background: #FFFFFF !important;
+  border-right: 1px solid var(--z-border) !important;
+  width: var(--sidebar);
+  padding: 24px 16px 20px !important;
+  color: var(--z-dark) !important;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 40;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.03);
+}
+
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 24px !important;
+  text-decoration: none;
+  color: var(--z-dark) !important;
+  border-bottom: 1px solid var(--z-border-subtle);
+  margin-bottom: 16px;
+}
+
+.wordmark .brand-logo-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--z-radius-md);
+  background: linear-gradient(135deg, #E23744 0%, #FF5A67 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(226, 55, 68, 0.3);
+  font-weight: 800;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.wordmark .brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.wordmark .brand-text b {
+  font-size: 18px;
+  letter-spacing: -0.5px;
+  color: var(--z-dark);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.wordmark .brand-text b span {
+  color: var(--z-red);
+}
+
+.wordmark .brand-text small {
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  color: var(--z-gray-muted);
+  font-weight: 600;
+  margin-top: 2px;
+  text-transform: uppercase;
+}
+
+.workspace-label {
+  color: var(--z-gray-muted) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.2px !important;
+  padding: 0 8px 12px !important;
+  text-transform: uppercase;
+}
+
+.side-link {
+  color: var(--z-gray-body) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  padding: 11px 14px !important;
+  border-radius: var(--z-radius-md) !important;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  transition: all 0.2s ease !important;
+  margin-bottom: 4px;
+  border: 1px solid transparent !important;
+}
+
+.side-link svg {
+  color: var(--z-gray-muted);
+  transition: color 0.2s ease;
+}
+
+.side-link:hover {
+  background: #F8F9FA !important;
+  color: var(--z-dark) !important;
+  transform: translateX(3px) !important;
+}
+
+.side-link:hover svg {
+  color: var(--z-red);
+}
+
+.side-link.active {
+  background: var(--z-red-light) !important;
+  color: var(--z-red) !important;
+  font-weight: 600 !important;
+  border-color: var(--z-red-border) !important;
+}
+
+.side-link.active svg {
+  color: var(--z-red) !important;
+}
+
+.side-link .new-tag {
+  background: var(--z-red) !important;
+  color: #FFFFFF !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  padding: 2px 7px !important;
+  border-radius: var(--z-radius-full) !important;
+  border: none !important;
+}
+
+.side-companion {
+  background: linear-gradient(145deg, #FFF0F2 0%, #FFFFFF 100%) !important;
+  border: 1px solid var(--z-red-border) !important;
+  border-radius: var(--z-radius-lg) !important;
+  padding: 16px !important;
+  text-decoration: none;
+  display: block;
+  margin: 16px 4px 16px !important;
+  box-shadow: var(--z-shadow-sm) !important;
+}
+
+.side-companion b {
+  color: var(--z-dark) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+}
+
+.side-companion small {
+  color: var(--z-red) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  margin-top: 6px !important;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.user-block {
+  border-top: 1px solid var(--z-border) !important;
+  padding-top: 16px !important;
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-block .avatar {
+  background: var(--z-red-soft) !important;
+  color: var(--z-red) !important;
+  font-weight: 700;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+}
+
+.user-block b {
+  color: var(--z-dark) !important;
+  font-size: 13px !important;
+}
+
+.user-block small {
+  color: var(--z-gray-muted) !important;
+  font-size: 10px !important;
+}
+
+/* Main Shell & Global Header (Zomato Top Bar) */
+.main-shell {
+  flex: 1;
+  margin-left: var(--sidebar);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.global-header {
+  height: 72px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-bottom: 1px solid var(--z-border) !important;
+  padding: 0 32px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.header-left-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Zomato Location Selector */
+.zomato-location-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFFFFF;
+  border: 1px solid var(--z-border);
+  padding: 8px 16px;
+  border-radius: var(--z-radius-full);
+  box-shadow: var(--z-shadow-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.zomato-location-pill:hover {
+  border-color: var(--z-red-border);
+  box-shadow: 0 4px 12px rgba(226, 55, 68, 0.1);
+}
+
+.zomato-location-pill .pin-icon {
+  color: var(--z-red);
+}
+
+.zomato-location-pill .loc-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.zomato-location-pill .loc-city {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--z-dark);
+  line-height: 1.2;
+}
+
+.zomato-location-pill select {
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--z-dark);
+  cursor: pointer;
+  outline: none;
+}
+
+/* Header Search Bar */
+.zomato-search-container {
+  flex: 1;
+  max-width: 480px;
+  margin: 0 24px;
+  position: relative;
+}
+
+.zomato-search-input-wrap {
+  display: flex;
+  align-items: center;
+  background: #F4F5F7;
+  border: 1px solid transparent;
+  border-radius: var(--z-radius-full);
+  padding: 0 16px;
+  height: 42px;
+  transition: all 0.2s ease;
+}
+
+.zomato-search-input-wrap:focus-within {
+  background: #FFFFFF;
+  border-color: var(--z-red);
+  box-shadow: 0 0 0 3px var(--z-red-soft);
+}
+
+.zomato-search-input-wrap svg {
+  color: var(--z-gray-muted);
+  margin-right: 10px;
+}
+
+.zomato-search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+  color: var(--z-dark);
+  width: 100%;
+}
+
+.zomato-search-input::placeholder {
+  color: var(--z-gray-muted);
+}
+
+/* Header Actions */
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px !important;
+}
+
+.header-lang-select {
+  border: 1px solid var(--z-border);
+  background: #FFFFFF;
+  border-radius: var(--z-radius-md);
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--z-dark);
+  cursor: pointer;
+  outline: none;
+}
+
+/* Screen Content */
+.screen {
+  max-width: 1280px !important;
+  margin: 0 auto;
+  padding: 32px 32px 80px !important;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Zomato Red Hero Promo Banner */
+.zomato-promo-banner {
+  background: linear-gradient(135deg, #E23744 0%, #D82F3C 50%, #B71C1C 100%);
+  border-radius: var(--z-radius-xl);
+  padding: 36px 40px;
+  color: #FFFFFF;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--z-shadow-red);
+  margin-bottom: 32px;
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  align-items: center;
+  gap: 28px;
+}
+
+.zomato-promo-banner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.zomato-promo-banner .promo-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  padding: 5px 12px;
+  border-radius: var(--z-radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.zomato-promo-banner h1 {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1.2;
+  margin: 0 0 12px;
+  color: #FFFFFF !important;
+}
+
+.zomato-promo-banner p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9) !important;
+  margin: 0 0 24px;
+  max-width: 480px;
+}
+
+.zomato-promo-banner .promo-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.zomato-promo-banner .btn-white {
+  background: #FFFFFF;
+  color: var(--z-red);
+  border: none;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 12px 22px;
+  border-radius: var(--z-radius-md);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.zomato-promo-banner .btn-white:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.zomato-promo-banner .btn-outline {
+  background: rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 12px 20px;
+  border-radius: var(--z-radius-md);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.zomato-promo-banner .btn-outline:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Zomato Category Carousel (Inspiration: Food categories / Bubbles) */
+.category-carousel-section {
+  margin-bottom: 36px;
+}
+
+.section-title-bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.section-title-bar h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--z-dark);
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.section-title-bar .subtitle {
+  font-size: 12px;
+  color: var(--z-gray-muted);
+}
+
+.zomato-categories-row {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+}
+
+.zomato-category-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #FFFFFF;
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-lg);
+  cursor: pointer;
+  min-width: 110px;
+  box-shadow: var(--z-shadow-sm);
+  transition: all 0.2s ease;
+  text-decoration: none;
+  color: var(--z-dark);
+  text-align: center;
+}
+
+.zomato-category-card:hover, .zomato-category-card.active {
+  border-color: var(--z-red);
+  transform: translateY(-3px);
+  box-shadow: var(--z-shadow);
+}
+
+.zomato-category-card.active {
+  background: var(--z-red-light);
+}
+
+.zomato-category-card.active .cat-name {
+  color: var(--z-red);
+  font-weight: 700;
+}
+
+.zomato-category-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #F8F9FA;
+  display: grid;
+  place-items: center;
+  color: var(--z-dark);
+  font-size: 24px;
+  transition: all 0.2s ease;
+}
+
+.zomato-category-card:hover .zomato-category-icon,
+.zomato-category-card.active .zomato-category-icon {
+  background: #FFFFFF;
+  color: var(--z-red);
+  box-shadow: 0 4px 12px rgba(226, 55, 68, 0.2);
+}
+
+.zomato-category-card .cat-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--z-dark);
+  line-height: 1.3;
+}
+
+.zomato-category-card .cat-capex {
+  font-size: 10px;
+  color: var(--z-gray-muted);
+}
+
+/* Quick Starter Finder Card (Zomato Filter Widget) */
+.zomato-finder-card {
+  background: #FFFFFF;
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-xl);
+  padding: 24px 28px;
+  box-shadow: var(--z-shadow);
+  margin-bottom: 36px;
+}
+
+.zomato-finder-card .finder-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.zomato-finder-card .finder-title h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--z-dark);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zomato-finder-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr auto;
+  gap: 20px;
+  align-items: end;
+}
+
+.zomato-input-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--z-gray-body);
+  margin-bottom: 8px;
+}
+
+.zomato-input-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-md);
+  padding: 0 14px;
+  height: 48px;
+  background: #FAFAFA;
+  transition: all 0.2s ease;
+}
+
+.zomato-input-box:focus-within {
+  background: #FFFFFF;
+  border-color: var(--z-red);
+  box-shadow: 0 0 0 3px var(--z-red-soft);
+}
+
+.zomato-input-box span.prefix {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--z-dark);
+  margin-right: 8px;
+}
+
+.zomato-input-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--z-dark);
+  width: 100%;
+}
+
+.zomato-input-box select {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--z-dark);
+  width: 100%;
+  cursor: pointer;
+}
+
+.quick-budget-chips {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.quick-chip {
+  background: #F4F5F7;
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--z-gray-body);
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-chip:hover, .quick-chip.active {
+  background: var(--z-red-light);
+  border-color: var(--z-red-border);
+  color: var(--z-red);
+}
+
+/* Zomato-Style Listing Cards (Restaurant / Store Card Style) */
+.zomato-listing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin-bottom: 36px;
+}
+
+.zomato-card {
+  background: #FFFFFF !important;
+  border: 1px solid var(--z-border) !important;
+  border-radius: var(--z-radius-xl) !important;
+  overflow: hidden;
+  box-shadow: var(--z-shadow) !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+}
+
+.zomato-card:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: var(--z-shadow-lg) !important;
+  border-color: #DCDCDC !important;
+}
+
+.zomato-card-hero {
+  height: 140px;
+  position: relative;
+  background: linear-gradient(135deg, #FFF0F2 0%, #FFE5E7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.zomato-card-hero .hero-bg-icon {
+  font-size: 64px;
+  filter: drop-shadow(0 6px 12px rgba(226, 55, 68, 0.2));
+  transform: scale(1.1);
+  transition: transform 0.3s ease;
+}
+
+.zomato-card:hover .hero-bg-icon {
+  transform: scale(1.25);
+}
+
+.zomato-rating-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: var(--z-green);
+  color: #FFFFFF;
+  padding: 4px 9px;
+  border-radius: var(--z-radius-md);
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(36, 150, 63, 0.3);
+}
+
+.zomato-card-pill-tag {
+  position: absolute;
+  bottom: 12px;
+  left: 14px;
+  background: rgba(28, 28, 28, 0.85);
+  color: #FFFFFF;
+  padding: 4px 10px;
+  border-radius: var(--z-radius-full);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
+.zomato-card-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.zomato-card-body .card-header-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.zomato-card-body h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--z-dark);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.zomato-card-body .card-category {
+  font-size: 12px;
+  color: var(--z-gray-muted);
+  margin-bottom: 14px;
+}
+
+.zomato-metrics-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.z-chip {
+  background: #F4F5F7;
+  border-radius: var(--z-radius-sm);
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--z-gray-body);
+}
+
+.z-chip.highlight {
+  background: var(--z-green-light);
+  color: var(--z-green-dark);
+}
+
+.z-chip.red-highlight {
+  background: var(--z-red-light);
+  color: var(--z-red);
+}
+
+.zomato-card-footer {
+  border-top: 1px dashed var(--z-border);
+  padding-top: 14px;
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.zomato-card-footer .unit-econ {
+  display: flex;
+  flex-direction: column;
+}
+
+.zomato-card-footer .unit-econ small {
+  font-size: 10px;
+  color: var(--z-gray-muted);
+}
+
+.zomato-card-footer .unit-econ b {
+  font-size: 14px;
+  color: var(--z-dark);
+  font-weight: 700;
+}
+
+.zomato-card-footer .action-btn {
+  background: var(--z-red);
+  color: #FFFFFF;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: var(--z-radius-md);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.zomato-card-footer .action-btn:hover {
+  background: var(--z-red-hover);
+}
+
+/* ========================================================
+   UNIQUE LOCALITY ANALYSER SUITE (Addressing User Request)
+   ======================================================== */
+.locality-analyser-suite {
+  background: #FFFFFF;
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-xl);
+  padding: 28px;
+  box-shadow: var(--z-shadow);
+  margin-bottom: 32px;
+}
+
+.analyser-suite-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+  border-bottom: 1px solid var(--z-border-subtle);
+  padding-bottom: 20px;
+}
+
+.analyser-suite-header h2 {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  margin: 0 0 4px;
+  color: var(--z-dark);
+}
+
+.analyser-suite-header p {
+  font-size: 13px;
+  color: var(--z-gray-muted);
+  margin: 0;
+}
+
+/* View Mode Switcher Pills */
+.analyser-view-tabs {
+  display: flex;
+  background: #F4F5F7;
+  padding: 4px;
+  border-radius: var(--z-radius-full);
+  gap: 4px;
+}
+
+.analyser-tab-btn {
+  background: transparent;
+  border: none;
+  padding: 8px 18px;
+  border-radius: var(--z-radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--z-gray-body);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.analyser-tab-btn.active {
+  background: #FFFFFF;
+  color: var(--z-red);
+  font-weight: 700;
+  box-shadow: var(--z-shadow-sm);
+}
+
+/* Category Filter Bar */
+.analyser-category-pills {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--z-border-subtle);
+}
+
+.analyser-category-pill {
+  background: #FFFFFF;
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-full);
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--z-gray-body);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.analyser-category-pill:hover {
+  border-color: var(--z-red-border);
+  color: var(--z-red);
+}
+
+.analyser-category-pill.active {
+  background: var(--z-red);
+  color: #FFFFFF;
+  border-color: var(--z-red);
+  box-shadow: 0 2px 8px rgba(226, 55, 68, 0.25);
+}
+
+/* Mode 1: Locality Leaderboard Grid */
+.locality-leaderboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.locality-rank-card {
+  background: #FFFFFF;
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+  box-shadow: var(--z-shadow-sm);
+  position: relative;
+  cursor: pointer;
+}
+
+.locality-rank-card:hover {
+  border-color: var(--z-red);
+  transform: translateY(-3px);
+  box-shadow: var(--z-shadow);
+}
+
+.locality-rank-card.selected {
+  border: 2px solid var(--z-red);
+  background: #FFFDFC;
+}
+
+.locality-rank-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.locality-rank-top .loc-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.locality-rank-top .loc-title h4 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--z-dark);
+}
+
+.locality-rank-top .loc-title small {
+  font-size: 11px;
+  color: var(--z-gray-muted);
+}
+
+.locality-score-badge {
+  background: var(--z-green);
+  color: #FFFFFF;
+  border-radius: var(--z-radius-md);
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(36, 150, 63, 0.25);
+}
+
+.locality-metrics-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: #F8F9FA;
+  border-radius: var(--z-radius-md);
+  padding: 12px;
+  gap: 8px;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.locality-metric-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.locality-metric-col span.metric-lbl {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--z-gray-muted);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.locality-metric-col b.metric-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--z-dark);
+}
+
+.locality-metric-col b.metric-val.green {
+  color: var(--z-green);
+}
+
+.locality-match-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.locality-match-tag {
+  background: var(--z-red-light);
+  color: var(--z-red);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--z-radius-full);
+}
+
+.locality-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--z-border-subtle);
+  padding-top: 14px;
+  margin-top: auto;
+}
+
+.btn-diagnose {
+  background: #FFFFFF;
+  border: 1px solid var(--z-border);
+  color: var(--z-dark);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 7px 14px;
+  border-radius: var(--z-radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-diagnose:hover {
+  background: #F4F5F7;
+  border-color: var(--z-gray-muted);
+}
+
+.btn-select-ward {
+  background: var(--z-red);
+  border: none;
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: var(--z-radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-select-ward:hover {
+  background: var(--z-red-hover);
+}
+
+/* Mode 2: Deep Diagnostic Radar & Peak Demand Clock */
+.diagnostic-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.diagnostic-card {
+  background: #FAFAFA;
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-lg);
+  padding: 24px;
+}
+
+.diagnostic-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--z-dark);
+  margin: 0 0 6px;
+}
+
+.diagnostic-card p.desc {
+  font-size: 12px;
+  color: var(--z-gray-muted);
+  margin: 0 0 20px;
+}
+
+.scorecard-hero {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: #FFFFFF;
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-md);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.score-circle-big {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #24963F 0%, #34D399 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(36, 150, 63, 0.3);
+  flex-shrink: 0;
+}
+
+.score-circle-big b {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.score-circle-big small {
+  font-size: 9px;
+  opacity: 0.9;
+}
+
+.scorecard-hero-text h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--z-dark);
+  margin: 0 0 4px;
+}
+
+.scorecard-hero-text p {
+  font-size: 12px;
+  color: var(--z-gray-body);
+  margin: 0;
+}
+
+/* 4 Performance Bars */
+.diagnostic-bars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.diag-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.diag-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--z-dark);
+}
+
+.diag-bar-track {
+  height: 8px;
+  background: #EAEAEA;
+  border-radius: var(--z-radius-full);
+  overflow: hidden;
+}
+
+.diag-bar-fill {
+  height: 100%;
+  border-radius: var(--z-radius-full);
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.diag-bar-fill.red { background: var(--z-red); }
+.diag-bar-fill.green { background: var(--z-green); }
+.diag-bar-fill.amber { background: var(--z-amber); }
+.diag-bar-fill.blue { background: #3B82F6; }
+
+/* 24-Hour Peak Customer Demand Clock */
+.demand-clock-container {
+  background: #FFFFFF;
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-md);
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.clock-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.clock-header b {
+  font-size: 13px;
+  color: var(--z-dark);
+}
+
+.clock-header span.peak-tag {
+  background: var(--z-red-light);
+  color: var(--z-red);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--z-radius-full);
+}
+
+.hourly-demand-bars {
+  display: flex;
+  align-items: flex-end;
+  height: 90px;
+  gap: 3px;
+  padding-top: 10px;
+}
+
+.hour-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.hour-bar-fill {
+  width: 100%;
+  background: #CBD5E1;
+  border-radius: 2px 2px 0 0;
+  transition: all 0.3s ease;
+}
+
+.hour-bar-fill.peak {
+  background: var(--z-red);
+}
+
+.hour-bar-fill.medium {
+  background: var(--z-amber);
+}
+
+.hour-label {
+  font-size: 7px;
+  color: var(--z-gray-muted);
+  margin-top: 4px;
+}
+
+/* Mode 3: Interactive Curated Map */
+.zomato-map-container {
+  height: 480px;
+  border-radius: var(--z-radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--z-border);
+  position: relative;
+}
+
+/* Mobile Tabs (Official Zomato 5-Tab Bar) */
+.mobile-tabs {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --sidebar: 0px;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .main-shell {
+    margin-left: 0 !important;
+  }
+
+  .global-header {
+    height: 64px !important;
+    padding: 0 16px !important;
+  }
+
+  .zomato-search-container {
+    display: none;
+  }
+
+  .screen {
+    padding: 16px 16px 90px !important;
+  }
+
+  .zomato-promo-banner {
+    grid-template-columns: 1fr;
+    padding: 24px 20px;
+    border-radius: var(--z-radius-lg);
+  }
+
+  .zomato-promo-banner h1 {
+    font-size: 24px;
+  }
+
+  .zomato-finder-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .zomato-listing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .locality-leaderboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .diagnostic-container {
+    grid-template-columns: 1fr;
+  }
+
+  /* Zomato 5-Tab Bottom Navigation */
+  .mobile-tabs {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 62px;
+    background: #FFFFFF !important;
+    border-top: 1px solid var(--z-border) !important;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+    z-index: 50;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 4px calc(env(safe-area-inset-bottom));
+  }
+
+  .mobile-tabs a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    text-decoration: none;
+    color: var(--z-gray-muted) !important;
+    font-size: 10px !important;
+    font-weight: 600;
+    gap: 3px;
+    padding: 6px 0;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-tabs a svg {
+    color: var(--z-gray-muted);
+    transition: all 0.2s ease;
+  }
+
+  .mobile-tabs a.active {
+    color: var(--z-red) !important;
+  }
+
+  .mobile-tabs a.active svg {
+    color: var(--z-red) !important;
+    transform: scale(1.1);
+  }
+}
+
+/* ========================================================
+   Zomato Polish for Forms, Cards, Advisors, and Calculators
+   ======================================================== */
+
+.card, .panel {
+  background: #FFFFFF !important;
+  border: 1px solid var(--z-border) !important;
+  border-radius: var(--z-radius-lg) !important;
+  box-shadow: var(--z-shadow-sm) !important;
+  padding: 24px !important;
+  color: var(--z-dark) !important;
+}
+
+.card:hover, .panel:hover {
+  box-shadow: var(--z-shadow) !important;
+}
+
+.card-title, h1, h2, h3, h4 {
+  color: var(--z-dark) !important;
+  letter-spacing: -0.4px;
+}
+
+h1 {
+  font-weight: 800 !important;
+}
+
+h2 {
+  font-weight: 700 !important;
+}
+
+p {
+  color: var(--z-gray-body) !important;
+}
+
+/* Buttons */
+.button.primary, button.primary {
+  background: var(--z-red) !important;
+  border-color: var(--z-red) !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  border-radius: var(--z-radius-md) !important;
+  box-shadow: 0 4px 14px rgba(226, 55, 68, 0.25) !important;
+  transition: all 0.2s ease !important;
+}
+
+.button.primary:hover, button.primary:hover {
+  background: var(--z-red-hover) !important;
+  border-color: var(--z-red-hover) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 18px rgba(226, 55, 68, 0.35) !important;
+}
+
+.button.secondary, button.secondary {
+  background: #FFFFFF !important;
+  border: 1px solid var(--z-border) !important;
+  color: var(--z-dark) !important;
+  font-weight: 600 !important;
+  border-radius: var(--z-radius-md) !important;
+  box-shadow: var(--z-shadow-sm) !important;
+}
+
+.button.secondary:hover, button.secondary:hover {
+  background: #F4F5F7 !important;
+  border-color: var(--z-gray-muted) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Key-Value lines */
+.kv {
+  border-bottom: 1px solid var(--z-border-subtle) !important;
+  padding: 12px 0 !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px !important;
+}
+
+.kv span {
+  color: var(--z-gray-body) !important;
+}
+
+.kv b {
+  color: var(--z-dark) !important;
+  font-weight: 700 !important;
+}
+
+.kv.total {
+  border-top: 2px solid var(--z-dark) !important;
+  border-bottom: none !important;
+  padding-top: 14px !important;
+}
+
+.kv.total b {
+  font-size: 16px !important;
+  color: var(--z-red) !important;
+}
+
+/* Comparisons */
+.comparison {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 16px !important;
+  margin: 20px 0 !important;
+}
+
+.comparison > div {
+  background: #FFFFFF !important;
+  border: 1px solid var(--z-border) !important;
+  border-radius: var(--z-radius-lg) !important;
+  padding: 20px !important;
+  box-shadow: var(--z-shadow-sm) !important;
+  text-align: center;
+}
+
+.comparison small {
+  color: var(--z-gray-muted) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+}
+
+.comparison strong {
+  display: block;
+  font-size: 26px !important;
+  font-weight: 800 !important;
+  color: var(--z-dark) !important;
+  margin-top: 6px;
+  letter-spacing: -0.5px;
+}
+
+/* Fields & Form Inputs */
+.field label, label.field {
+  color: var(--z-gray-body) !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  margin-bottom: 6px !important;
+}
+
+.field input, .field select, .select, .input, .emi input, .emi select, input[type=number], input[type=text] {
+  background: #FFFFFF !important;
+  border: 1px solid #DCDCDC !important;
+  color: var(--z-dark) !important;
+  border-radius: var(--z-radius-md) !important;
+  padding: 10px 14px !important;
+  font-size: 14px !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.field input:focus, .field select:focus, .select:focus, input[type=number]:focus, input[type=text]:focus {
+  border-color: var(--z-red) !important;
+  box-shadow: 0 0 0 3px var(--z-red-soft) !important;
+  outline: none !important;
+}
+
+/* Badges & Pills */
+.badge, .status-pill, .pill {
+  background: #F4F5F7 !important;
+  color: var(--z-gray-dark) !important;
+  border: 1px solid var(--z-border) !important;
+  border-radius: var(--z-radius-full) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  padding: 4px 10px !important;
+}
+
+.pill.green, .badge.green, .green-text {
+  background: var(--z-green-light) !important;
+  color: var(--z-green-dark) !important;
+  border-color: var(--z-green-border) !important;
+}
+
+.pill.orange, .orange-text {
+  background: var(--z-amber-light) !important;
+  color: #B45309 !important;
+  border-color: #FDE68A !important;
+}
+
+/* AI Saathi Chat Polish */
+.chat {
+  background: #F8F9FA !important;
+  border: 1px solid var(--z-border) !important;
+  border-radius: var(--z-radius-xl) !important;
+  padding: 24px !important;
+}
+
+.bubble.ai {
+  background: #FFFFFF !important;
+  border: 1px solid var(--z-border) !important;
+  color: var(--z-dark) !important;
+  border-radius: 18px 18px 18px 4px !important;
+  box-shadow: var(--z-shadow-sm) !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+}
+
+.bubble.user {
+  background: var(--z-red) !important;
+  color: #FFFFFF !important;
+  border-radius: 18px 18px 4px 18px !important;
+  box-shadow: 0 4px 12px rgba(226, 55, 68, 0.25) !important;
+  font-size: 14px !important;
+}
+
+.chip-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 14px 0;
+}
+
+.chip {
+  background: #FFFFFF !important;
+  border: 1px solid var(--z-border) !important;
+  color: var(--z-dark) !important;
+  font-weight: 600 !important;
+  border-radius: var(--z-radius-full) !important;
+  padding: 8px 16px !important;
+  box-shadow: var(--z-shadow-sm) !important;
+  transition: all 0.2s ease !important;
+}
+
+.chip:hover {
+  border-color: var(--z-red) !important;
+  color: var(--z-red) !important;
+  background: var(--z-red-light) !important;
+}
+
+.composer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.composer input {
+  flex: 1;
+  background: #FFFFFF !important;
+  border: 1px solid var(--z-border) !important;
+  border-radius: var(--z-radius-full) !important;
+  padding: 12px 20px !important;
+  font-size: 14px !important;
+  color: var(--z-dark) !important;
+}
+
+.composer input:focus {
+  border-color: var(--z-red) !important;
+  box-shadow: 0 0 0 3px var(--z-red-soft) !important;
+}
+
+.composer .send {
+  background: var(--z-red) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  width: 44px;
+  height: 44px;
+  border-radius: 50% !important;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(226, 55, 68, 0.25) !important;
+}
+
+.mic {
+  background: #FFFFFF !important;
+  border: 1px solid var(--z-border) !important;
+  color: var(--z-dark) !important;
+  border-radius: var(--z-radius-md) !important;
+  font-weight: 600 !important;
+  margin-top: 8px;
+}
+
+.mic:hover {
+  border-color: var(--z-red) !important;
+  color: var(--z-red) !important;
+}
