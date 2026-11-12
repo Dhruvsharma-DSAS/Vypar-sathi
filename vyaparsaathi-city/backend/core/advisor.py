@@ -1,4 +1,4 @@
-"""Server-side Gemini chat for the hosted Saathi advisor."""
+"""Server-side Gemini and Groq chat for the hosted Saathi advisor."""
 import json
 import os
 import re
@@ -48,10 +48,22 @@ class AdvisorRequest(BaseModel):
     research: bool = False
 
 
+def configured_keys():
+    return {
+        provider: key
+        for provider in ("gemini", "groq")
+        if (key := os.environ.get(f"{provider.upper()}_API_KEY", "").strip())
+    }
+
+
 @router.get("/status")
 def status():
-    configured = bool(os.environ.get("GEMINI_API_KEY", "").strip())
-    return {"provider": "gemini" if configured else None, "research": configured}
+    providers = list(configured_keys())
+    return {
+        "provider": next(iter(providers), None),
+        "providers": providers,
+        "research": "gemini" in providers,
+    }
 
 
 def web_sources(candidate):
@@ -75,19 +87,7 @@ def web_sources(candidate):
     return list(sources.values())[:8]
 
 
-@router.post("/chat")
-def chat(payload: AdvisorRequest):
-    key = os.environ.get("GEMINI_API_KEY", "").strip()
-    if not key:
-        raise HTTPException(503, "Gemini is not configured")
-    model = (
-        os.environ.get("GEMINI_RESEARCH_MODEL", "gemini-2.5-flash-lite")
-        if payload.research
-        else os.environ.get("GEMINI_MODEL", "gemini-flash-lite-latest")
-    )
-    if not re.fullmatch(r"[a-zA-Z0-9._-]+", model):
-        raise HTTPException(503, "Invalid Gemini model configuration")
-
+def reserve_call():
     with call_lock:
         now = time.monotonic()
         while recent_calls and now - recent_calls[0] >= 60:
@@ -96,6 +96,14 @@ def chat(payload: AdvisorRequest):
             raise HTTPException(429, "Saathi is busy. Try again shortly.")
         recent_calls.append(now)
 
+
+def gemini_reply(payload, key):
+    model = os.environ.get(
+        "GEMINI_RESEARCH_MODEL" if payload.research else "GEMINI_MODEL",
+        "gemini-3.5-flash-lite",
+    ).strip()
+    if not re.fullmatch(r"[a-zA-Z0-9._-]+", model):
+        raise HTTPException(503, "Invalid Gemini model configuration")
     content = json.dumps(payload.model_dump(), ensure_ascii=False)
     prompt = f"{SYSTEM_PROMPT} {RESEARCH_PROMPT}" if payload.research else SYSTEM_PROMPT
     request_body = {
@@ -110,7 +118,7 @@ def chat(payload: AdvisorRequest):
             f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
             headers={"x-goog-api-key": key},
             json=request_body,
-            timeout=(3, 22 if payload.research else 15),
+            timeout=(3, 22 if payload.research else 9),
         )
         if response.status_code == 429:
             raise HTTPException(429, "Gemini quota is temporarily unavailable")
@@ -132,3 +140,58 @@ def chat(payload: AdvisorRequest):
         "sources": sources,
         "searchSuggestions": suggestions if isinstance(suggestions, str) and len(suggestions) <= 40000 else None,
     }
+
+
+
+def groq_reply(payload, key):
+    model = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b").strip()
+    if not model:
+        raise HTTPException(503, "Invalid Groq model configuration")
+
+    body = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": json.dumps(payload.model_dump(), ensure_ascii=False)},
+        ],
+        "max_completion_tokens": 800,
+        "temperature": 0.25,
+    }
+    if model in ("openai/gpt-oss-20b", "openai/gpt-oss-120b"):
+        body["reasoning_effort"] = "low"
+    try:
+        response = requests.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers={"Authorization": f"Bearer {key}"},
+            json=body,
+            timeout=(3, 9),
+        )
+        if response.status_code == 429:
+            raise HTTPException(429, "Groq quota is temporarily unavailable")
+        response.raise_for_status()
+        answer = response.json()["choices"][0]["message"]["content"]
+        if not isinstance(answer, str) or not answer.strip():
+            raise ValueError("Empty reply")
+    except (requests.RequestException, ValueError, KeyError, IndexError, TypeError):
+        raise HTTPException(502, "Groq could not generate a reply") from None
+    return {"text": answer.strip()[:4000], "provider": "groq", "sources": []}
+
+
+@router.post("/chat")
+def chat(payload: AdvisorRequest):
+    keys = configured_keys()
+    if payload.research:
+        if "gemini" not in keys:
+            raise HTTPException(503, "Web research requires Gemini")
+        reserve_call()
+        return gemini_reply(payload, keys["gemini"])
+    if not keys:
+        raise HTTPException(503, "No advisor model is configured")
+    reserve_call()
+    if "gemini" in keys:
+        try:
+            return gemini_reply(payload, keys["gemini"])
+        except HTTPException:
+            if "groq" not in keys:
+                raise
+    return groq_reply(payload, keys["groq"])

@@ -72,6 +72,8 @@ def test_market_filters_and_pagination(client):
     b=client.get('/api/v1/market/pois?city=pune&category=restaurant&limit=2&offset=2').json()
     assert all(r['city']=='pune' and r['category']=='restaurant' for r in a['records'])
     assert a['records'][0]['record_id']!=b['records'][0]['record_id']
+    assert len(a['category_options']) > len(a['categories'])
+    assert sum(count for _, count in a['category_options']) == a['city_total']
     assert client.get('/api/v1/market/pois?city=unknown').status_code==422
 
 def test_weather_failure_is_explicit(client,monkeypatch):
@@ -147,5 +149,51 @@ def test_advisor_web_research_returns_only_cited_https_sources(client, monkeypat
 
 def test_advisor_reports_missing_configuration(client, monkeypatch):
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
-    assert client.get("/api/v1/advisor/status").json() == {"provider": None, "research": False}
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    assert client.get("/api/v1/advisor/status").json() == {"provider": None, "providers": [], "research": False}
     assert client.post("/api/v1/advisor/chat", json={"text": "Hello"}).status_code == 503
+
+
+@pytest.mark.parametrize("gemini_configured", [False, True])
+def test_advisor_groq_handles_chat_but_not_web_research(client, monkeypatch, gemini_configured):
+    from backend.core import advisor
+
+    monkeypatch.setattr(advisor, "recent_calls", advisor.deque())
+    monkeypatch.setenv("GROQ_API_KEY", "test-groq-key")
+    monkeypatch.delenv("GROQ_MODEL", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    if gemini_configured:
+        monkeypatch.setenv("GEMINI_API_KEY", "test-gemini-key")
+
+    calls = []
+
+    class GroqResponse:
+        status_code = 200
+
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"choices": [{"message": {"content": "Hello! What would you like to start?"}}]}
+
+    def fake_post(url, *, headers, json, timeout):
+        calls.append(url)
+        if "googleapis.com" in url:
+            raise main.requests.Timeout("test timeout")
+        assert url == "https://api.groq.com/openai/v1/chat/completions"
+        assert headers == {"Authorization": "Bearer test-groq-key"}
+        assert json["model"] == "openai/gpt-oss-20b"
+        return GroqResponse()
+
+    monkeypatch.setattr(advisor.requests, "post", fake_post)
+    status = client.get("/api/v1/advisor/status").json()
+    assert status["providers"] == (["gemini", "groq"] if gemini_configured else ["groq"])
+    assert status["research"] is gemini_configured
+    response = client.post("/api/v1/advisor/chat", json={"text": "Hello"})
+    assert response.json() == {"text": "Hello! What would you like to start?", "provider": "groq", "sources": []}
+    assert len(calls) == (2 if gemini_configured else 1)
+
+    calls.clear()
+    response = client.post("/api/v1/advisor/chat", json={"text": "Laundry in Pune", "research": True})
+    assert response.status_code == (502 if gemini_configured else 503)
+    assert all("googleapis.com" in url for url in calls)

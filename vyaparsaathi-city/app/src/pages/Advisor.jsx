@@ -111,7 +111,7 @@ export default function Advisor({ profile: p, updateProfile, common, cityData })
 
       const history = messages
         .filter((entry) => Boolean(entry.research) === research &&
-          (entry.from === "user" || ["gemini", "ollama", "cloud"].includes(entry.provider)))
+          (entry.from === "user" || ["gemini", "groq", "ollama", "cloud"].includes(entry.provider)))
         .slice(-6)
         .map((entry) => ({ role: entry.from === "user" ? "user" : "assistant", text: entry.text.slice(0, 1000) }));
       const templates = common.types.map((item) => `${item.name} (${rupees(economics(item, common, p.city).cashNeeded)})`);
@@ -220,11 +220,17 @@ export default function Advisor({ profile: p, updateProfile, common, cityData })
 
   const providerLabels = {
     gemini: "Gemini",
+    groq: "Groq",
     ollama: "Local model",
     cloud: "Hosted model",
     "built-in": "Built-in guidance",
     unavailable: "Web research unavailable",
   };
+
+  const providers = modelStatus?.providers ?? (modelStatus?.provider ? [modelStatus.provider] : []);
+  const modelLabel = modelStatus === undefined ? "Checking model…" : providers.length
+    ? `${providers.map((provider) => providerLabels[provider]).join(" + ")} configured`
+    : "Built-in guidance available";
 
   return (
     <div className="screen advisor-screen">
@@ -233,7 +239,7 @@ export default function Advisor({ profile: p, updateProfile, common, cityData })
         <div>
           <h1>Ask Saathi</h1>
           <p>Your small-business planning companion</p>
-          <span className="advisor-provider">{modelStatus === undefined ? "Checking model…" : modelStatus?.provider ? `${providerLabels[modelStatus.provider]} configured` : "Built-in guidance available"}</span>
+          <span className="advisor-provider">{modelLabel}</span>
         </div>
       </header>
 

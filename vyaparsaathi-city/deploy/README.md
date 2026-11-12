@@ -26,7 +26,21 @@ After deployment, open `https://YOUR-SERVICE.onrender.com/api/v1/health` and `/d
 
 Add VITE_BACKEND_URL on Vercel with the Render service's HTTPS origin, then redeploy the frontend. This URL is public configuration, not a secret. Exact record lookup, server finance checks and model inference then reach Render. The browser shows a preview subset if the record API is unavailable; full CSV downloads stay available from Vercel.
 
-VYAPAR_EXTERNAL_APIS_ENABLED stays false on both services until Dhruv supplies the chosen provider configuration. Groq or Gemini keys belong in Vercel server environment variables, never VITE_ variables. The weather adapter is in Render's backend. No credentials are bundled.
+## Hosted Saathi advisor
+
+In Render, open **vypar-sathi-api → Environment**. Add whichever provider keys you have, then choose **Save and deploy**.
+
+| Variable | Value |
+| --- | --- |
+| `GEMINI_API_KEY` | Your key from Google AI Studio |
+| `GROQ_API_KEY` | Your key from the Groq Console |
+| `GEMINI_MODEL` | Optional. Defaults to `gemini-3.5-flash-lite` |
+| `GEMINI_RESEARCH_MODEL` | Optional. Defaults to `gemini-3.5-flash-lite` |
+| `GROQ_MODEL` | Optional. Defaults to `openai/gpt-oss-20b` |
+
+Saathi uses Gemini for chat when configured and falls back to Groq if Gemini fails. Groq also works as the sole chat provider. Cited web research uses Gemini with Google Search and requires access to that tool on the Google project. The status endpoint at `/api/v1/advisor/status` lists configured providers without returning their keys. An actual chat reply confirms the provider works.
+
+Keep these credentials on Render for the published app. The `VYAPAR_EXTERNAL_APIS_ENABLED` flag controls unrelated integrations such as weather on Render. The standalone Vite and Vercel advisor adapter uses its own server configuration and retains that flag.
 
 ## Install the mobile app
 

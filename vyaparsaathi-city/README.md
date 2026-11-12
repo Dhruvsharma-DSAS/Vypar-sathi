@@ -67,11 +67,11 @@ Configure only services you choose. Put credentials in your own ignored environm
 
 | Capability | What you need to provide |
 | --- | --- |
-| AI advisor | Your own `GROQ_API_KEY` **or** `GEMINI_API_KEY`, plus a model identifier enabled on your account. One provider is sufficient. |
+| AI advisor | Your own `GEMINI_API_KEY` or `GROQ_API_KEY` in Render. Set both for chat fallback. Gemini enables cited web research. See [deployment setup](deploy/README.md#hosted-saathi-advisor) for model defaults. |
 | Current mandi prices | Your own `DATA_GOV_API_KEY` for the data.gov.in AGMARKNET resource. The supplied daily importer is separate from the app's sample price file. |
 | Live weather | Confirm your chosen weather service. An Open-Meteo adapter is included but disabled; its public non-commercial endpoint needs no key. A different provider needs an adapter matching its response. |
 
-When ready, explicitly set `VYAPAR_EXTERNAL_APIS_ENABLED=true` in the relevant server environment. The Python backend reads exported environment variables; it does not automatically read `.env` files. For Vite AI, copy `app/.env.example` to `app/.env.local` and restart Vite. Until then, existing environment keys cannot activate AI calls by themselves. Never use `VITE_` for secrets.
+The Render advisor activates with either provider key. `VYAPAR_EXTERNAL_APIS_ENABLED` separately controls weather and the standalone Vite/Vercel advisor adapter. The Python backend reads exported environment variables. For standalone Vite AI, copy `app/.env.example` to `app/.env.local` and restart Vite. Use server environment variables for provider secrets.
 
 No automatic dataset refresh is enabled. After you approve the public sources, you can manually run:
 

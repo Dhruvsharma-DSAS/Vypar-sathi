@@ -14,14 +14,15 @@ Use ONLY the numbers given. Never promise profit. Never say the user is eligible
 
 async function callGroq(system, user, wantJson) {
   const body = {
-    model: process.env.GROQ_MODEL || "llama-3.1-8b-instant",
+    model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
     messages: [
       { role: "system", content: system },
       { role: "user", content: user },
     ],
     temperature: 0.2,
-    max_tokens: 400,
+    max_completion_tokens: 800,
   };
+  if (["openai/gpt-oss-20b", "openai/gpt-oss-120b"].includes(body.model)) body.reasoning_effort = "low";
   if (wantJson) {
     body.response_format = { type: "json_object" };
   }
@@ -39,12 +40,12 @@ async function callGroq(system, user, wantJson) {
 }
 
 async function callGemini(system, user) {
-  const model = process.env.GEMINI_MODEL || "gemini-flash-lite-latest";
-  const url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + process.env.GEMINI_API_KEY;
+  const model = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
+  const url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent";
   const res = await fetch(url, {
     signal: AbortSignal.timeout(9000),
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY },
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: system }] },
       contents: [{ role: "user", parts: [{ text: user }] }],

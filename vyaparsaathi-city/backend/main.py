@@ -187,7 +187,7 @@ def pois(city: Literal['bengaluru', 'pune'], category: str = Query('', max_lengt
     rows = [r for r in poi_rows(path.stat().st_mtime_ns) if r['city'] == city]
     counts = Counter(r['category'] for r in rows)
     filtered = [r for r in rows if (not category or r['category'] == category) and (not q or q.casefold() in (r['name'] + ' ' + r['category']).casefold())]
-    return {'city': city, 'total': len(filtered), 'city_total': len(rows), 'categories': counts.most_common(15), 'records': filtered[offset:offset+limit], 'offset': offset, 'data_kind': 'mapped_poi_snapshot', 'warning': 'Mapped places are not sales, footfall, or a complete business census.'}
+    return {'city': city, 'total': len(filtered), 'city_total': len(rows), 'categories': counts.most_common(15), 'category_options': sorted(counts.items(), key=lambda item: item[0].casefold()), 'records': filtered[offset:offset+limit], 'offset': offset, 'data_kind': 'mapped_poi_snapshot', 'warning': 'Mapped places are not sales, footfall, or a complete business census.'}
 
 _weather_cache = {}
 @app.get('/api/v1/weather')
