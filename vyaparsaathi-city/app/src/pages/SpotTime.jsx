@@ -3,6 +3,8 @@ import HourBars from "../components/HourBars.jsx";
 import { bestWindow } from "../lib/score.js";
 import { getWeather } from "../lib/api.js";
 import Icon from "../components/Icon.jsx";
+import SiteChecks from "../components/SiteChecks.jsx";
+import { planKey } from "../lib/storage.js";
 
 const WINDOWS = {
   morning: [6, 12],
@@ -65,6 +67,7 @@ export default function SpotTime(props) {
   }
 
   const news = props.common.news[p.city];
+  const checksKey = planKey(p) + "_site_" + encodeURIComponent(spot.name);
 
   return (
     <div className="screen">
@@ -83,6 +86,8 @@ export default function SpotTime(props) {
         </div>
       </div>
 
+      <a className="button secondary site-check-link" href="#site-checks">Open site checks <Icon name="arrow" size={16} /></a>
+
       {/* Spot Selector & Day Switcher Bar */}
       <div
         className="anim-fade-up anim-stagger-1"
@@ -100,7 +105,7 @@ export default function SpotTime(props) {
           boxShadow: "var(--z-shadow-sm)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1, minWidth: "260px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: "1 1 240px", minWidth: 0 }}>
           <div
             style={{
               width: "40px",
@@ -242,7 +247,10 @@ export default function SpotTime(props) {
         </div>
       </div>
 
-      {/* 2-Column: Weather Guidance & City News Pulse */}
+      <SiteChecks key={checksKey} storageKey={checksKey} spot={spot.name}
+        suggestedPrice={type ? String(type.price) : ""} />
+
+      {/* Weather Guidance & City News Pulse */}
       <div className="two-column">
         {/* Weather Card */}
         <div className="card anim-fade-up anim-stagger-3">

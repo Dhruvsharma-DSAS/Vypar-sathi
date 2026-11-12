@@ -97,7 +97,7 @@ function Calculator({ profile: p, updateProfile, common, type }) {
     setter(e.target.value === "" ? "" : Math.min(max, Math.max(min, Number(e.target.value))));
 
   return (
-    <div className="screen">
+    <div className="screen cost-screen">
       {/* Page Heading */}
       <div className="page-heading" style={{ marginBottom: "24px" }}>
         <div>
@@ -114,16 +114,13 @@ function Calculator({ profile: p, updateProfile, common, type }) {
       </div>
 
       {/* Business Selector Pill */}
-      <div style={{ background: "#FFFFFF", padding: "16px 20px", borderRadius: "var(--z-radius-lg)", border: "1px solid var(--z-border)", marginBottom: "24px", display: "flex", alignItems: "center", gap: "16px", boxShadow: "var(--z-shadow-sm)" }}>
+      <div className="cost-business-select">
         <Icon name="shop" size={20} style={{ color: "var(--z-red)" }} />
         <div style={{ flex: 1 }}>
-          <small style={{ fontSize: "11px", color: "var(--z-gray-muted)", fontWeight: 600, textTransform: "uppercase" }}>
-            Selected Business Blueprint
-          </small>
-          <select
+          <label htmlFor="cost-business">Business blueprint</label>
+          <select id="cost-business"
             value={type.id}
             onChange={(e) => updateProfile({ businessId: e.target.value })}
-            style={{ width: "100%", border: "none", background: "transparent", fontSize: "16px", fontWeight: 700, color: "var(--z-dark)", cursor: "pointer", outline: "none", padding: "4px 0" }}
           >
             {common.types.map((t) => (
               <option key={t.id} value={t.id}>
@@ -135,9 +132,9 @@ function Calculator({ profile: p, updateProfile, common, type }) {
       </div>
 
       {/* 3 Key Metric Cards */}
-      <div className="comparison">
+      <div className="comparison cost-metrics">
         <div>
-          <small>Unit Cost (Ingredients & Fuel)</small>
+          <small>Unit cost</small>
           <strong>₹{cost.total.toFixed(2)}</strong>
           <span style={{ fontSize: "11px", color: "var(--z-gray-muted)" }}>Per {type.unit}</span>
         </div>
@@ -147,7 +144,7 @@ function Calculator({ profile: p, updateProfile, common, type }) {
           <span style={{ fontSize: "11px", color: "var(--z-green)", fontWeight: 700 }}>{percent}% Contribution</span>
         </div>
         <div>
-          <small>Daily Break-Even Volume</small>
+          <small>Daily break-even</small>
           <strong>{be ?? "—"}</strong>
           <span style={{ fontSize: "11px", color: "var(--z-gray-muted)" }}>{type.unit}s / day needed</span>
         </div>

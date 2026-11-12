@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, lazy, Suspense, Component } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { loadJson } from "./lib/api.js";
 import Shell from "./components/Shell.jsx";
 const Settings = lazy(()=>import("./pages/Settings.jsx"));
@@ -39,7 +39,18 @@ class ToolBoundary extends Component {
  render(){if(this.state.failed)return <div className="screen market-empty" role="alert"><h1>This tool couldn’t load.</h1><p>Reconnect and retry. Tools you previously visited remain available offline.</p><button className="button primary" onClick={()=>window.location.reload()}>Retry</button> <a className="button secondary" href="/">Back to Discover</a></div>;return this.props.children}
 }
 
+function LoadingScreen({ label }) {
+  return (
+    <div className="screen loading-workspace" role="status">
+      <p className="app-loading-label">{label}</p>
+      <div className="skeleton skeleton-heading" aria-hidden="true" />
+      <div className="skeleton skeleton-hero" aria-hidden="true" />
+    </div>
+  );
+}
+
 export default function App() {
+  const { pathname } = useLocation();
   const [profile, setProfile] = useState(() => {
     const saved = readStore("profile", {});
     const city = ['bengaluru','pune'].includes(saved.city) ? saved.city : 'bengaluru';
@@ -47,7 +58,9 @@ export default function App() {
   });
   const [common, setCommon] = useState(null);
   const [cityData, setCityData] = useState(null);
-  const [error, setError] = useState("");
+  const [commonError, setCommonError] = useState("");
+  const [cityError, setCityError] = useState("");
+  const error = commonError || cityError;
 
   useEffect(() => {
     writeStore("profile", profile);
@@ -65,12 +78,12 @@ export default function App() {
       .then((all) => {
         setCommon({ types: all[0], recipes: all[1], schemes: all[2], licences: all[3], mandi: all[4], news: all[5] });
       })
-      .catch((e) => setError(e.message));
+      .catch((error) => setCommonError(error.message));
   }, []);
 
   useEffect(() => {
     let cancelled = false;
-    setError("");
+    setCityError("");
     setCityData(null);
     const c = profile.city;
     Promise.all([
@@ -79,9 +92,9 @@ export default function App() {
       loadJson("/data/" + c + "/rush_clock.json"),
     ])
       .then((all) => {
-        if (!cancelled) setCityData({ stats: all[0], shapes: all[1], rush: all[2] });
+        if (!cancelled) setCityData({ city: c, stats: all[0], shapes: all[1], rush: all[2] });
       })
-      .catch((e) => setError(e.message));
+      .catch((error) => { if (!cancelled) setCityError(error.message); });
     return () => { cancelled = true; };
   }, [profile.city]);
 
@@ -92,15 +105,19 @@ export default function App() {
   if (error !== "") {
     return <Shell profile={profile} updateProfile={updateProfile}><div className="screen"><div className="designed-error" role="alert"><span className="eyebrow">LET’S TRY THAT AGAIN</span><h1>Your workspace couldn’t load.</h1><p>We couldn’t retrieve the city data. Check your connection and try again.</p><button className="button primary" onClick={()=>window.location.reload()}>Reload workspace</button><details><summary>View details</summary>{error}</details></div></div></Shell>;
   }
-  if (common === null || cityData === null) {
-    return <Shell profile={profile} updateProfile={updateProfile}><div className="screen loading-workspace" role="status" aria-label="Loading your workspace"><div className="skeleton skeleton-heading"/><div className="skeleton skeleton-hero"/><div className="skeleton-grid">{[0,1,2,3].map(i=><div key={i} className="skeleton skeleton-stat"/>)}</div><span className="muted small">Preparing your workspace…</span></div></Shell>;
+  if (!common || cityData?.city !== profile.city) {
+    return (
+      <Shell profile={profile} updateProfile={updateProfile}>
+        <LoadingScreen label={common ? "Loading city data…" : "Preparing VyaparSaathi…"} />
+      </Shell>
+    );
   }
 
   const shared = { profile: profile, updateProfile: updateProfile, common: common, cityData: cityData };
 
   return (
     <Shell profile={profile} updateProfile={updateProfile}>
-      <ToolBoundary><Suspense fallback={<div className="screen" role="status"><div className="skeleton skeleton-hero"/>Loading your workspace…</div>}><Routes key={profile.city}>
+      <ToolBoundary key={pathname}><Suspense fallback={<LoadingScreen label="Opening this screen…" />}><Routes key={profile.city}>
         <Route path="/" element={<Home {...shared} />} />
         <Route path="/advisor" element={<Advisor {...shared} />} />
         <Route path="/idea/:typeId" element={<IdeaDetail {...shared} />} />

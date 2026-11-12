@@ -1,5 +1,5 @@
 export async function loadJson(path){const res=await fetch(path);if(!res.ok)throw new Error('Could not load '+path);return res.json()}
-export async function askAI(task,payload){try{const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task,payload}),signal:AbortSignal.timeout(12000)});if(!res.ok)return null;return await res.json()}catch{return null}}
+export async function askAI(task,payload){try{const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task,payload}),signal:AbortSignal.timeout(task==="advisor_reply"?27000:12000)});if(!res.ok)return null;return await res.json()}catch{return null}}
 const BACKEND_URL=(import.meta.env.VITE_BACKEND_URL||'').replace(/\/$/,'');
 async function snapshot(path){
  if(path==='/datasets')return loadJson('/data/real/manifest.json');
@@ -9,3 +9,33 @@ async function snapshot(path){
 }
 export async function backend(path,options={}){try{const res=await fetch(BACKEND_URL+'/api/v1'+path,{...options,headers:{'Content-Type':'application/json',...options.headers},signal:AbortSignal.timeout(15000)});if(!res.ok)throw Error('Backend request failed ('+res.status+').');return await res.json()}catch(error){if(!options.method||options.method==='GET')return snapshot(path);throw error}}
 export async function getWeather(city){try{const result=await backend('/weather?city='+encodeURIComponent(city));return {...result.data,stale:result.stale,cached_at:Date.parse(result.retrieved_at_utc)}}catch{return null}}
+
+
+export async function advisorStatus() {
+  try {
+    if (import.meta.env.DEV || !BACKEND_URL) return await askAI("advisor_status", {});
+    const response = await fetch(BACKEND_URL + "/api/v1/advisor/status", {
+      signal: AbortSignal.timeout(12000),
+    });
+    return response.ok ? await response.json() : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function advisorReply(payload) {
+  if (!BACKEND_URL || (import.meta.env.DEV && !payload.research)) {
+    return payload.research ? null : askAI("advisor_reply", payload);
+  }
+  try {
+    const response = await fetch(BACKEND_URL + "/api/v1/advisor/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(27000),
+    });
+    return response.ok ? await response.json() : null;
+  } catch {
+    return null;
+  }
+}

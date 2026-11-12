@@ -19,12 +19,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from .core import planner
+from .core.advisor import router as advisor_router
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / 'data' / 'real'
 DB = Path(os.environ.get('VYAPAR_DB_PATH', str(ROOT / 'data' / 'observations.sqlite3')))
 CITIES = {'bengaluru': (12.9716, 77.5946), 'pune': (18.5204, 73.8567)}
 app = FastAPI(title='VyaparSaathi Unified API', version='2.0.0')
+app.include_router(advisor_router)
 app.add_middleware(CORSMiddleware, allow_origins=os.environ.get('CORS_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173').split(','), allow_methods=['GET', 'POST'], allow_headers=['Content-Type', 'Authorization'], allow_credentials=False)
 
 @contextmanager

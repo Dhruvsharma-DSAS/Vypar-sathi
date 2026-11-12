@@ -100,3 +100,50 @@ def test_external_apis_disabled_by_default(client,monkeypatch):
         pytest.fail('No external request should be made')
     monkeypatch.setattr(main.requests,'get',forbidden)
     assert client.get('/api/v1/weather?city=pune').status_code==503
+
+
+def test_advisor_web_research_returns_only_cited_https_sources(client, monkeypatch):
+    from backend.core import advisor
+
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    monkeypatch.setattr(advisor, "recent_calls", advisor.deque())
+
+    class Response:
+        status_code = 200
+
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"candidates": [{
+                "content": {"parts": [{"text": "Ask nearby shops for repair quotes."}]},
+                "groundingMetadata": {
+                    "groundingChunks": [
+                        {"web": {"title": "Local source", "uri": "https://example.org/repair"}},
+                        {"web": {"title": "Uncited", "uri": "https://example.org/irrelevant"}},
+                        {"web": {"title": "Unsafe", "uri": "javascript:alert(1)"}},
+                    ],
+                    "groundingSupports": [{"groundingChunkIndices": [0, 2, 0, -1]}],
+                },
+            }]}
+
+    def grounded_request(url, *, headers, json, timeout):
+        assert url.startswith("https://generativelanguage.googleapis.com/")
+        assert headers == {"x-goog-api-key": "test-key"}
+        assert json["tools"] == [{"googleSearch": {}}]
+        return Response()
+
+    monkeypatch.setattr(advisor.requests, "post", grounded_request)
+    payload = {"text": "Bicycle repair near a college in Pune", "research": True}
+    response = client.post("/api/v1/advisor/chat", json=payload)
+    assert response.status_code == 200
+    assert response.json()["sources"] == [{"title": "Local source", "url": "https://example.org/repair"}]
+
+    monkeypatch.setattr(advisor, "web_sources", lambda candidate: [])
+    assert client.post("/api/v1/advisor/chat", json=payload).status_code == 502
+
+
+def test_advisor_reports_missing_configuration(client, monkeypatch):
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    assert client.get("/api/v1/advisor/status").json() == {"provider": None, "research": False}
+    assert client.post("/api/v1/advisor/chat", json={"text": "Hello"}).status_code == 503

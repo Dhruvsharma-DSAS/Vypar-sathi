@@ -1,16 +1,20 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { askAI } from "../lib/api.js";
+import { Link, useSearchParams } from "react-router-dom";
+import { advisorStatus, advisorReply } from "../lib/api.js";
 import { readMoney, readBusiness, readSkill, readHours, readYesNo, readWard } from "../lib/parse.js";
 import { advisorText } from "../lib/i18n.js";
-import { rankBusinesses } from "../lib/score.js";
+import { economics } from "../lib/analyser.js";
 import { rupees } from "../lib/money.js";
 import { PILOT_WARDS } from "../App.jsx";
 import Icon from "../components/Icon.jsx";
 import SaathiBot from "../components/SaathiBot.jsx";
 
 export default function Advisor({ profile: p, updateProfile, common, cityData }) {
-  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const research = searchParams.get("research") === "1";
+  const [modelStatus, setModelStatus] = useState(undefined);
+  const [showChoices, setShowChoices] = useState(false);
+  const city = p.city === "pune" ? "Pune" : "Bengaluru";
   const t = advisorText(p.language);
   const wards = cityData.stats.wards;
   const order =
@@ -38,6 +42,14 @@ export default function Advisor({ profile: p, updateProfile, common, cityData })
   const chatRef = useRef(null);
   const busy = useRef(false);
 
+  useEffect(() => {
+    let active = true;
+    advisorStatus().then((status) => {
+      if (active) setModelStatus(status);
+    });
+    return () => { active = false; };
+  }, []);
+
   useEffect(() => () => {
     recRef.current?.abort();
     window.speechSynthesis?.cancel();
@@ -48,69 +60,86 @@ export default function Advisor({ profile: p, updateProfile, common, cityData })
   }, [messages, thinking]);
 
   async function handleAnswer(answer, direct) {
-    if (!answer.trim() || busy.current || !field) return;
+    answer = answer.trim();
+    if (!answer || busy.current) return;
     busy.current = true;
     setError("");
     setThinking(true);
     setMessages((old) => [...old, { from: "user", text: answer }]);
     setText("");
 
-    let changes = { ...direct };
-    if (!direct) {
-      const b = readBusiness(answer),
-        m = readMoney(answer),
-        s = readSkill(answer),
-        h = readHours(answer),
-        w = readWard(answer, wards);
-      if (b) changes.businessId = b;
-      if (
-        m !== null &&
-        (field === "money" ||
-          /hazaar|hazar|thousand|lakh|हजार|हज़ार|लाख|ಸಾವಿರ|rupees|₹|rs\b|\d+k\b/i.test(answer))
-      )
-        changes.money = m;
-      if (s) changes.skill = s;
-      if (h) changes.hours = h;
-      if (w) changes.wardId = w;
-      if (field === "loan") {
-        const yn = readYesNo(answer);
-        if (yn !== null) changes.loan = yn;
+    try {
+      const question = /[?？]|^(what|which|where|when|why|how|can|could|should|would|is|are)\b/i.test(answer);
+      const parsers = {
+        businessId: () => {
+          const exact = common.types.find((item) =>
+            [item.name, item.hindi].some((name) => name.toLowerCase() === answer.toLowerCase())
+          );
+          if (exact) return exact.id;
+          const match = readBusiness(answer);
+          if (match === "phone_repair" && !/^(repair)$|\b(phone|mobile|device)\b/i.test(answer)) return null;
+          return match;
+        },
+        money: () => readMoney(answer),
+        skill: () => readSkill(answer),
+        hours: () => readHours(answer),
+        wardId: () => readWard(answer, wards),
+        loan: () => readYesNo(answer),
+      };
+      const value = field && !research && !question ? parsers[field]() : null;
+      const validValue = value != null && value !== "" &&
+        (field !== "money" || (value > 0 && value <= 10000000)) &&
+        (field !== "businessId" || common.types.some((item) => item.id === value));
+      const changes = direct || (validValue ? { [field]: value } : null);
+      if (changes) {
+        updateProfile(changes);
+        setShowChoices(false);
+        setMessages((old) => [...old, { from: "ai", prefix: "ok", field: missing({ ...p, ...changes }) }]);
+        return;
       }
-      if (!Object.keys(changes).length) {
-        const ai = await askAI("extract_profile", {
-          text: answer,
-          asked: field,
-          wards: wards.map((w) => w.name),
-          language: p.language,
-        });
-        if (ai?.profile) {
-          changes = { ...ai.profile };
-          if (changes.wardName) {
-            changes.wardId = readWard(changes.wardName, wards);
-            delete changes.wardName;
-          }
-        }
+
+      const history = messages
+        .filter((entry) => entry.from === "user" || entry.provider === "gemini" || entry.provider === "ollama" || entry.provider === "cloud")
+        .slice(-6)
+        .map((entry) => ({ role: entry.from === "user" ? "user" : "assistant", text: entry.text.slice(0, 1000) }));
+      const templates = common.types.map((item) => `${item.name} (${rupees(economics(item, common, p.city).cashNeeded)})`);
+      const context = research
+        ? `Default city: ${city}. If the user specifies a different location, use that location.`
+        : `City: ${city}. Selected idea: ${business?.name ?? "undecided"}. Budget: ${p.money ? rupees(p.money) : "unspecified"}. Sample startup cash, including one month of fixed costs: ${templates.join(", ")}.`;
+      const reply = await advisorReply({
+        text: answer, language: p.language, context, history, research,
+      });
+      if (reply?.text && (!research || reply.sources?.length)) {
+        setMessages((old) => [...old, { from: "ai", ...reply }]);
+        return;
       }
-    }
 
-    const valid = {};
-    for (const [k, v] of Object.entries(changes)) {
-      if (k === "businessId" && common.types.some((x) => x.id === v)) valid[k] = v;
-      if (k === "wardId" && wards.some((x) => x.ward_id === v)) valid[k] = v;
-      if (k === "money" && Number.isFinite(v) && v >= 0 && v <= 10000000) valid[k] = v;
-      if (k === "skill" && ["cooking", "tailoring", "repair", "none"].includes(v)) valid[k] = v;
-      if (k === "hours" && ["morning", "lunch", "evening", "both"].includes(v)) valid[k] = v;
-      if (k === "loan" && typeof v === "boolean") valid[k] = v;
+      const budget = readMoney(answer);
+      const suggestions = !research && budget > 0 ? common.types
+        .map((item) => ({ name: item.name, cash: economics(item, common, p.city).cashNeeded }))
+        .filter((item) => item.cash <= budget)
+        .sort((a, b) => a.cash - b.cash)
+        .slice(0, 3) : [];
+      let fallback = "Tell me the business you have in mind or your starting budget. I can suggest a few of our templates and show you what to check before spending.";
+      if (research) {
+        fallback = "I couldn’t retrieve cited web results right now. Try again with your business idea and city.";
+      } else if (suggestions.length) {
+        fallback = `Sample setups within ${rupees(budget)} include ${suggestions.map(({ name, cash }) => `${name} (${rupees(cash)})`).join(", ")}. Check local quotes before choosing.`;
+      } else if (/^(hello|hi|hey|namaste)\b/i.test(answer)) {
+        fallback = `Hello! What are you thinking of starting in ${city}? Share your idea or tell me how much you can set aside.`;
+      }
+      setMessages((old) => [...old, { from: "ai", text: fallback, provider: research ? "unavailable" : "built-in" }]);
+    } finally {
+      setThinking(false);
+      busy.current = false;
     }
+  }
 
-    updateProfile(valid);
-    const next = missing({ ...p, ...valid });
-    setMessages((old) => [
-      ...old,
-      { from: "ai", prefix: Object.keys(valid).length ? "ok" : "retry", field: next },
-    ]);
-    setThinking(false);
-    busy.current = false;
+  function toggleResearch() {
+    const params = new URLSearchParams(searchParams);
+    if (research) params.delete("research");
+    else params.set("research", "1");
+    setSearchParams(params, { replace: true, preventScrollReset: true });
   }
 
   function voice() {
@@ -177,185 +206,109 @@ export default function Advisor({ profile: p, updateProfile, common, cityData })
     k === "loan" ? typeof p[k] === "boolean" : !!p[k]
   ).length;
 
+  const providerLabels = {
+    gemini: "Gemini",
+    ollama: "Local model",
+    cloud: "Hosted model",
+    "built-in": "Built-in guidance",
+    unavailable: "Web research unavailable",
+  };
+
   return (
-    <div className="screen">
-      {/* Page Heading */}
-      <div className="page-heading anim-fade-up" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <div className="screen advisor-screen">
+      <header className="advisor-heading">
+        <SaathiBot compact planner mood={thinking ? "thinking" : research ? "curious" : field ? "friendly" : "celebrate"} />
         <div>
-          <span className="eyebrow" style={{ color: "var(--z-red)", fontWeight: 700 }}>
-            INTELLIGENT BUSINESS GUIDE
-          </span>
-          <h1 style={{ fontSize: "28px", fontWeight: 800, margin: "4px 0" }}>
-            Saathi AI Advisor
-          </h1>
-          <p style={{ fontSize: "13px", color: "var(--z-gray-muted)" }}>
-            Speak in your own words or click suggested options. Let’s configure your plan step-by-step.
-          </p>
+          <h1>Ask Saathi</h1>
+          <p>Your small-business planning companion</p>
+          <span className="advisor-provider">{modelStatus === undefined ? "Checking model…" : modelStatus?.provider ? `${providerLabels[modelStatus.provider]} configured` : "Built-in guidance available"}</span>
         </div>
+      </header>
 
-        <div
-          style={{
-            background: complete === order.length ? "var(--z-green-light)" : "var(--z-red-light)",
-            border: `1px solid ${complete === order.length ? "var(--z-green-border)" : "var(--z-red-border)"}`,
-            color: complete === order.length ? "var(--z-green-dark)" : "var(--z-red)",
-            padding: "8px 16px",
-            borderRadius: "var(--z-radius-full)",
-            fontWeight: 700,
-            fontSize: "13px",
-          }}
-        >
-          {complete}/{order.length} Steps Completed
-        </div>
-      </div>
+      <div className="advisor-grid">
+        <section className="advisor-workspace" aria-label="Chat with Saathi">
+          <div className="advisor-mode">
+            <button type="button" aria-pressed={!research} disabled={thinking} onClick={research ? toggleResearch : undefined}>Plan a business</button>
+            <button type="button" aria-pressed={research} disabled={thinking} onClick={!research ? toggleResearch : undefined}>Research another idea</button>
+          </div>
+          {research && <p className="research-note">
+            Describe your idea and where you want to start it. Saathi searches for sources and suggests what to verify locally.
+            {modelStatus !== undefined && !modelStatus?.research && " Web research requires a configured Gemini connection."}
+          </p>}
 
-      <div className="advisor-grid" style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: "24px", marginTop: "16px" }}>
-        {/* Left: Chat Screen */}
-        <div className="anim-fade-up anim-stagger-1">
-          <div
-            ref={chatRef}
-            className="chat"
-            role="log"
-            aria-live="polite"
-            style={{
-              height: "420px",
-              overflowY: "auto",
-              display: "flex",
-              flexDirection: "column",
-              gap: "14px",
-              padding: "20px",
-              background: "#FFFFFF",
-              border: "1px solid var(--z-border)",
-              borderRadius: "var(--z-radius-xl)",
-              boxShadow: "var(--z-shadow-sm)",
-            }}
-          >
+          <div ref={chatRef} className="chat advisor-log" role="log" aria-label="Messages">
             <div className="bubble ai">
-              {p.mode === "discover" ? t.discover : t.intro}
-              <br />
-              {messages.length === 0 ? (field ? t[field] : t.done) : null}
+              {research ? "What idea should we research? For example, bicycle repair near a college in Pune." : p.mode === "discover" ? t.discover : t.intro}
+              {!research && messages.length === 0 && <><br />{field ? t[field] : t.done}</>}
             </div>
-
-            {messages.map((m, i) => (
-              <div className={"bubble " + m.from} key={i}>
-                {m.text || t[m.prefix] + (m.field ? t[m.field] : t.done)}
+            {messages.map((message, i) => (
+              <div className={`bubble ${message.from}`} key={i}>
+                {message.provider && <small className="message-provider">{message.sources?.length ? "Web research · Gemini" : providerLabels[message.provider]}</small>}
+                {message.text || t[message.prefix] + (message.field ? t[message.field] : t.done)}
+                {message.sources?.length > 0 && <ul className="advisor-sources" aria-label="Web sources">
+                  {message.sources.map(({ url, title }) => (
+                    <li key={url}><a href={url} target="_blank" rel="noreferrer">{title} ↗</a></li>
+                  ))}
+                </ul>}
               </div>
             ))}
-
-            {thinking && (
-              <div className="bubble ai" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span>Saathi is analyzing data…</span>
-              </div>
-            )}
+            {thinking && <div className="bubble ai" role="status">{research ? "Looking for sources…" : "Saathi is thinking…"}</div>}
           </div>
 
-          {/* Quick Choice Chips */}
-          <div className="chip-row" style={{ margin: "16px 0 10px" }}>
-            {chips.map(([label, value]) => (
-              <button
-                className="chip"
-                disabled={thinking}
-                key={label}
-                onClick={() => handleAnswer(label, value)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          <form className="composer advisor-composer" onSubmit={(e) => { e.preventDefault(); handleAnswer(text); }}>
+            <button type="button" className="advisor-voice" aria-label={listening ? t.listening : t.voice} aria-pressed={listening} disabled={thinking} onClick={voice}>
+              <Icon name="mic" size={17} />
+            </button>
+            <input
+              aria-label="Message to Saathi"
+              value={text}
+              readOnly={thinking}
+              placeholder={research ? "Describe your business idea…" : "Ask a question or give an answer…"}
+              onChange={(e) => setText(e.target.value)}
+              maxLength={1000}
+            />
+            <button className="send" disabled={thinking || !text.trim()} aria-label="Send message">
+              <Icon name="arrow" size={17} />
+            </button>
+          </form>
+          {error && <p className="input-error" role="status">{error}</p>}
 
-          {field === "wardId" && (
-            <label className="field" style={{ margin: "10px 0" }}>
-              Or choose any neighbourhood in {p.city === "pune" ? "Pune" : "Bengaluru"}
-              <select
-                value=""
-                onChange={(e) => {
-                  const w = wards.find((w) => w.ward_id === e.target.value);
-                  if (w) handleAnswer(w.name, { wardId: w.ward_id });
-                }}
-              >
-                <option value="">Select from all wards</option>
-                {wards.map((w) => (
-                  <option key={w.ward_id} value={w.ward_id}>
-                    {w.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-
-          {/* Composer */}
-          {field && (
-            <div style={{ marginTop: "12px" }}>
-              <form className="composer" onSubmit={(e) => { e.preventDefault(); handleAnswer(text); }}>
-                <input
-                  aria-label="Message to Saathi"
-                  value={text}
-                  disabled={thinking}
-                  placeholder={t.placeholder}
-                  onChange={(e) => setText(e.target.value)}
-                  maxLength={1000}
-                />
-                <button className="send" disabled={thinking || !text.trim()} aria-label="Send message">
-                  <Icon name="arrow" size={16} />
-                </button>
-              </form>
-
-              <button
-                className="mic"
-                disabled={thinking}
-                onClick={voice}
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px",
-                  cursor: "pointer",
-                }}
-              >
-                <Icon name="mic" size={16} />
-                <span>{listening ? t.listening : t.voice}</span>
-              </button>
+          {!research && chips.length > 0 && <div className="advisor-choices">
+            <span>Quick answers</span>
+            <div className="chip-row">
+              {(showChoices ? chips : chips.slice(0, 4)).map(([label, value]) => (
+                <button className="chip" disabled={thinking} key={label} onClick={() => handleAnswer(label, value)}>{label}</button>
+              ))}
+              {chips.length > 4 && <button className="chip" aria-expanded={showChoices} onClick={() => setShowChoices(!showChoices)}>{showChoices ? "Show fewer" : `Show all ${chips.length}`}</button>}
+              {field === "businessId" && <button className="chip advisor-other-chip" disabled={thinking} onClick={toggleResearch}>Other business idea</button>}
             </div>
-          )}
+          </div>}
 
-          {error && <p className="input-error" role="status" style={{ color: "var(--z-red)", fontSize: "12px", marginTop: "8px" }}>{error}</p>}
-        </div>
+          {!research && field === "wardId" && <label className="field advisor-ward">
+            Choose any neighbourhood in {city}
+            <select value="" onChange={(e) => {
+              const chosen = wards.find((item) => item.ward_id === e.target.value);
+              if (chosen) handleAnswer(chosen.name, { wardId: chosen.ward_id });
+            }}>
+              <option value="">Select from all wards</option>
+              {wards.map((item) => <option key={item.ward_id} value={item.ward_id}>{item.name}</option>)}
+            </select>
+          </label>}
+        </section>
 
-        {/* Right: Profile Plan Taking Shape */}
-        <aside className="card advisor-profile anim-fade-up anim-stagger-2" style={{ display: "flex", flexDirection: "column" }}>
-          <div className="advisor-bot" style={{ display: "flex", justifyContent: "center", marginBottom: "12px" }}>
-            <SaathiBot mood={thinking ? "thinking" : field ? "listening" : "celebrate"} />
-          </div>
-
-          <h2 style={{ fontSize: "18px", fontWeight: 700, margin: "8px 0 4px", color: "var(--z-dark)" }}>
-            Your Blueprint Summary
-          </h2>
-          <p style={{ fontSize: "12px", color: "var(--z-gray-muted)", marginBottom: "14px" }}>
-            Your profile, updated during this conversation.
-          </p>
-
-          <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-            {[
-              ["Target Business", business?.name],
-              ["Starting Capital", p.money ? rupees(p.money) : null],
-              ["Skill Domain", p.skill],
-              ["Neighbourhood", ward?.name],
-              ["Shift / Hours", p.hours],
-              ["Funding Support", p.loan === null ? null : p.loan ? "Explore Micro-Loans" : "Own Savings Only"],
-            ].map(([label, value]) => (
-              <div className="kv" key={label}>
-                <span>{label}</span>
-                <b>{value || "Pending answer"}</b>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ marginTop: "16px", paddingTop: "14px", borderTop: "1px solid var(--z-border)" }}>
-            <Link to="/settings" style={{ fontSize: "12px", color: "var(--z-red)", fontWeight: 700, textDecoration: "none" }}>
-              Edit Profile Settings Directly →
-            </Link>
-          </div>
+        <aside className="card advisor-profile">
+          <h2>Your business plan</h2>
+          <p>{complete} of {order.length} setup steps complete</p>
+          <progress value={complete} max={order.length} aria-label="Plan setup progress" />
+          {[
+            ["Business idea", business?.name],
+            ["Starting capital", p.money ? rupees(p.money) : null],
+            ["Skill", p.skill],
+            ["Neighbourhood", ward?.name],
+            ["Hours", p.hours],
+            ["Funding", typeof p.loan === "boolean" ? p.loan ? "Explore loans" : "Own savings" : null],
+          ].map(([label, value]) => <div className="kv" key={label}><span>{label}</span><b>{value || "Pending"}</b></div>)}
+          <Link to="/settings">Edit profile <Icon name="arrow" size={15} /></Link>
         </aside>
       </div>
     </div>
