@@ -9,6 +9,17 @@ import { PILOT_WARDS } from "../App.jsx";
 import Icon from "../components/Icon.jsx";
 import SaathiBot from "../components/SaathiBot.jsx";
 
+function SearchSuggestions({ html }) {
+  const policy = "default-src 'none'; style-src 'unsafe-inline'; img-src data: https://www.gstatic.com; form-action 'none'; base-uri 'none'";
+  return <iframe
+    className="advisor-search-suggestions"
+    title="Google Search suggestions"
+    sandbox="allow-popups allow-popups-to-escape-sandbox"
+    referrerPolicy="no-referrer"
+    srcDoc={`<!doctype html><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${policy}"><base target="_blank"><style>body{margin:0}</style>${html}`}
+  />;
+}
+
 export default function Advisor({ profile: p, updateProfile, common, cityData }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const research = searchParams.get("research") === "1";
@@ -65,7 +76,7 @@ export default function Advisor({ profile: p, updateProfile, common, cityData })
     busy.current = true;
     setError("");
     setThinking(true);
-    setMessages((old) => [...old, { from: "user", text: answer }]);
+    setMessages((old) => [...old, { from: "user", text: answer, research }]);
     setText("");
 
     try {
@@ -99,7 +110,8 @@ export default function Advisor({ profile: p, updateProfile, common, cityData })
       }
 
       const history = messages
-        .filter((entry) => entry.from === "user" || entry.provider === "gemini" || entry.provider === "ollama" || entry.provider === "cloud")
+        .filter((entry) => Boolean(entry.research) === research &&
+          (entry.from === "user" || ["gemini", "ollama", "cloud"].includes(entry.provider)))
         .slice(-6)
         .map((entry) => ({ role: entry.from === "user" ? "user" : "assistant", text: entry.text.slice(0, 1000) }));
       const templates = common.types.map((item) => `${item.name} (${rupees(economics(item, common, p.city).cashNeeded)})`);
@@ -110,7 +122,7 @@ export default function Advisor({ profile: p, updateProfile, common, cityData })
         text: answer, language: p.language, context, history, research,
       });
       if (reply?.text && (!research || reply.sources?.length)) {
-        setMessages((old) => [...old, { from: "ai", ...reply }]);
+        setMessages((old) => [...old, { from: "ai", ...reply, research }]);
         return;
       }
 
@@ -250,6 +262,7 @@ export default function Advisor({ profile: p, updateProfile, common, cityData })
                     <li key={url}><a href={url} target="_blank" rel="noreferrer">{title} ↗</a></li>
                   ))}
                 </ul>}
+                {message.searchSuggestions && <SearchSuggestions html={message.searchSuggestions} />}
               </div>
             ))}
             {thinking && <div className="bubble ai" role="status">{research ? "Looking for sources…" : "Saathi is thinking…"}</div>}

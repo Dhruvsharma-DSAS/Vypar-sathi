@@ -124,6 +124,7 @@ def test_advisor_web_research_returns_only_cited_https_sources(client, monkeypat
                         {"web": {"title": "Unsafe", "uri": "javascript:alert(1)"}},
                     ],
                     "groundingSupports": [{"groundingChunkIndices": [0, 2, 0, -1]}],
+                    "searchEntryPoint": {"renderedContent": "<div>Search suggestions</div>"},
                 },
             }]}
 
@@ -138,6 +139,7 @@ def test_advisor_web_research_returns_only_cited_https_sources(client, monkeypat
     response = client.post("/api/v1/advisor/chat", json=payload)
     assert response.status_code == 200
     assert response.json()["sources"] == [{"title": "Local source", "url": "https://example.org/repair"}]
+    assert response.json()["searchSuggestions"] == "<div>Search suggestions</div>"
 
     monkeypatch.setattr(advisor, "web_sources", lambda candidate: [])
     assert client.post("/api/v1/advisor/chat", json=payload).status_code == 502

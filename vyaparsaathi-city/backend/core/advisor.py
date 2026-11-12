@@ -121,8 +121,14 @@ def chat(payload: AdvisorRequest):
         if not answer:
             raise ValueError("Empty reply")
         sources = web_sources(candidate) if payload.research else []
+        suggestions = candidate.get("groundingMetadata", {}).get("searchEntryPoint", {}).get("renderedContent") if payload.research else None
     except (requests.RequestException, ValueError, KeyError, IndexError, TypeError):
         raise HTTPException(502, "Gemini could not generate a reply") from None
     if payload.research and not sources:
         raise HTTPException(502, "Gemini did not return cited web evidence")
-    return {"text": answer[:4000], "provider": "gemini", "sources": sources}
+    return {
+        "text": answer[:4000],
+        "provider": "gemini",
+        "sources": sources,
+        "searchSuggestions": suggestions if isinstance(suggestions, str) and len(suggestions) <= 40000 else None,
+    }
